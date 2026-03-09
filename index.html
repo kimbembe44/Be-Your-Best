@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrick OS — Focus, organisation et assistant personnel</title>
+  <meta
+    name="description"
+    content="Espace personnel premium pour organiser ses tâches, garder le focus et dialoguer avec un assistant intelligent."
+  />
+  <style>
+    :root{
+      --bg: #0a0a0f;
+      --bg-soft: #11131a;
+      --panel: rgba(255,255,255,.06);
+      --panel-strong: rgba(255,255,255,.10);
+      --text: #f5f7fb;
+      --muted: #aab1c3;
+      --line: rgba(255,255,255,.10);
+      --accent: #7c9cff;
+      --accent-2: #9bffd3;
+      --danger: #ff7b7b;
+      --warning: #ffca6b;
+      --success: #7effb2;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 24px;
+      --radius-sm: 18px;
+      --max: 1400px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,156,255,.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(155,255,211,.10), transparent 24%),
+        linear-gradient(180deg, #08090d 0%, #0d1118 45%, #090b10 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .noise::before{
+      content:"";
+      position: fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.05;
+      background-image:
+        radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 1px),
+        radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 1px),
+        radial-gradient(circle at 40% 80%, #fff 0 1px, transparent 1px);
+      background-size: 240px 240px;
+      mix-blend-mode: soft-light;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: rgba(10,12,18,.55);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.03)),
+        linear-gradient(135deg, rgba(124,156,255,.8), rgba(155,255,211,.45));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.20), 0 10px 30px rgba(124,156,255,.18);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: -.04em;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 0.98rem;
+      letter-spacing: -.02em;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: .22s ease;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(124,156,255,.25), rgba(155,255,211,.14));
+      border-color: rgba(124,156,255,.35);
+      box-shadow: 0 12px 30px rgba(124,156,255,.15);
+    }
+
+    .btn.danger {
+      border-color: rgba(255,123,123,.25);
+      background: rgba(255,123,123,.08);
+      color: #ffd4d4;
+    }
+
+    .hero {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 56px 24px 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: .92rem;
+      margin-bottom: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.8rem, 7vw, 6.5rem);
+      line-height: .94;
+      letter-spacing: -.06em;
+      max-width: 1100px;
+    }
+
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #cdd7ff 40%, #b4ffe4 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      max-width: 800px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.22rem);
+      line-height: 1.7;
+      margin: 20px 0 0;
+    }
+
+    .hero-grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      min-height: 104px;
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-card strong {
+      font-size: 2rem;
+      letter-spacing: -.05em;
+      display: block;
+    }
+
+    .app-shell {
+      max-width: var(--max);
+      margin: 24px auto 50px;
+      padding: 0 24px 48px;
+      display: grid;
+      grid-template-columns: 320px minmax(0,1fr) 360px;
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      letter-spacing: -.03em;
+      margin: 0;
+    }
+
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: .88rem;
+      margin-top: 6px;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .left-col, .right-col, .center-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .input, .textarea, .select {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.10);
+      outline: none;
+      border-radius: 18px;
+      padding: 14px 16px;
+      transition: .18s ease;
+    }
+
+    .textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .input:focus, .textarea:focus, .select:focus {
+      border-color: rgba(124,156,255,.55);
+      box-shadow: 0 0 0 4px rgba(124,156,255,.10);
+      background: rgba(255,255,255,.08);
+    }
+
+    .task-form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .inline {
+      display: flex;
+      gap: 10px;
+    }
+
+    .inline > * { flex: 1; }
+
+    .hint {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .modes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mode {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      padding: 14px;
+      cursor: pointer;
+      transition: .2s ease;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .mode:hover, .mode.active {
+      background: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+      border-color: rgba(124,156,255,.40);
+    }
+
+    .mode strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .96rem;
+    }
+
+    .mode span {
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.45;
+    }
+
+    .chat {
+      min-height: 680px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-stream {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 620px;
+      overflow: auto;
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      animation: fadeUp .25s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      font-size: .9rem;
+      font-weight: 700;
+      border: 1px solid var(--line);
+    }
+
+    .avatar.ai {
+      background: linear-gradient(145deg, rgba(124,156,255,.25), rgba(155,255,211,.18));
+    }
+
+    .avatar.user {
+      background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    }
+
+    .bubble {
+      flex: 1;
+      border-radius: 22px;
+      padding: 16px 18px;
+      line-height: 1.65;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      white-space: pre-wrap;
+    }
+
+    .bubble strong {
+      letter-spacing: -.02em;
+    }
+
+    .assistant-tools {
+      padding: 0 18px 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .quick {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: .2s ease;
+      min-height: 76px;
+    }
+
+    .quick:hover {
+      background: rgba(255,255,255,.10);
+      transform: translateY(-1px);
+    }
+
+    .quick strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .92rem;
+    }
+
+    .quick span {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.35;
+    }
+
+    .composer {
+      padding: 18px;
+      border-top: 1px solid var(--line);
+      background: rgba(0,0,0,.12);
+    }
+
+    .composer-box {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius: 26px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .composer textarea {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      resize: none;
+      min-height: 56px;
+      max-height: 180px;
+      width: 100%;
+      padding: 10px 12px;
+    }
+
+    .composer-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .badge {
+      font-size: .78rem;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow: auto;
+    }
+
+    .task {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-top {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .task-title {
+      margin: 0;
+      font-size: .96rem;
+      line-height: 1.35;
+      letter-spacing: -.02em;
+    }
+
+    .task.done .task-title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: .76rem;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+    .priority-high { color: #ffd0d0; border-color: rgba(255,123,123,.22); background: rgba(255,123,123,.08); }
+    .priority-medium { color: #ffe8bf; border-color: rgba(255,202,107,.22); background: rgba(255,202,107,.08); }
+    .priority-low { color: #cfffe2; border-color: rgba(126,255,178,.22); background: rgba(126,255,178,.08); }
+
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .ghost-btn:hover {
+      background: rgba(255,255,255,.08);
+    }
+
+    .focus-card {
+      padding: 18px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(124,156,255,.18), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border: 1px solid var(--line);
+    }
+
+    .focus-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+      letter-spacing: -.03em;
+    }
+
+    .focus-item {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .focus-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .98rem;
+    }
+
+    .focus-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: .92rem;
+    }
+
+    .timer {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timer-clock {
+      font-size: 3rem;
+      letter-spacing: -.06em;
+      margin: 0;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(124,156,255,.95), rgba(155,255,211,.95));
+      transition: width .8s linear;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      letter-spacing: -.03em;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .footer-note {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 24px 50px;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.7;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1180px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+      .assistant-tools {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+      .hero-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 740px) {
+      .topbar-inner,
+      .hero,
+      .app-shell,
+      .footer-note {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .hero {
+        padding-top: 30px;
+      }
+
+      .hero-grid,
+      .assistant-tools,
+      .modes {
+        grid-template-columns: 1fr;
+      }
+
+      .inline {
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body class="noise">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">P</div>
+        <div class="brand-text">
+          <strong>Patrick OS</strong>
+          <span>Ton cockpit personnel pour décider, prioriser et avancer</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="btn" id="resetDemoBtn">Réinitialiser les données</button>
+        <button class="btn primary" id="smartPlanBtn">Que dois-je faire aujourd’hui ?</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Focus guidé • Organisation anti-dispersion • Assistant personnel intégré</div>
+    <h1>
+      Un espace pour <span class="gradient">penser moins</span>,
+      choisir mieux, et agir maintenant.
+    </h1>
+    <p>
+      Tu balances tout ce que tu as en tête. Le site trie, priorise, te propose une seule vraie
+      prochaine action, puis t’aide à rester dessus. Pas un gadget. Un vrai cockpit pour les jours
+      où ton cerveau part dans 12 directions en même temps.
+    </p>
+
+    <div class="hero-grid">
+      <div class="stat-card">
+        <span>Tâches ouvertes</span>
+        <strong id="statOpen">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Tâches terminées</span>
+        <strong id="statDone">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Focus du jour</span>
+        <strong id="statFocus">—</strong>
+      </div>
+      <div class="stat-card">
+        <span>Mode actuel</span>
+        <strong id="statMode">Calme</strong>
+      </div>
+    </div>
+  </section>
+
+  <main class="app-shell">
+    <aside class="left-col">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Brain dump</h2>
+            <div class="panel-subtitle">Vide ta tête ici. Le site convertit ça en tâches.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="task-form-grid">
+            <textarea
+              id="brainDump"
+              class="textarea"
+              placeholder="Exemple :
+- appeler Sandra pour le CTP
+- finir le support de présentation
+- acheter une chemise noire
+- planifier la semaine
+- répondre au mail de Guillaume"
+            ></textarea>
+
+            <div class="inline">
+              <select id="defaultPriority" class="select">
+                <option value="medium">Priorité moyenne par défaut</option>
+                <option value="high">Priorité haute par défaut</option>
+                <option value="low">Priorité basse par défaut</option>
+              </select>
+              <select id="defaultEnergy" class="select">
+                <option value="medium">Énergie moyenne</option>
+                <option value="high">Énergie haute</option>
+                <option value="low">Énergie basse</option>
+              </select>
+            </div>
+
+            <button class="btn primary" id="convertDumpBtn">Transformer en tâches</button>
+            <div class="hint">
+              Mets une ligne par idée, ou sépare avec des virgules / points-virgules.
+              Pas besoin d’être propre. Le but, c’est de sortir le bazar mental.
+            </div>
+          </div>
+
+          <div class="badge-row">
+            <span class="badge">TDAH friendly</span>
+            <span class="badge">Sauvegarde locale</span>
+            <span class="badge">Décision rapide</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Modes de focus</h2>
+            <div class="panel-subtitle">Tu changes l’interface selon ton état mental.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="modes">
+            <button class="mode active" data-mode="calm">
+              <strong>Mode calme</strong>
+              <span>Affichage équilibré. Tu vois tout, sans surcharge.</span>
+            </button>
+            <button class="mode" data-mode="single">
+              <strong>Une seule chose</strong>
+              <span>Le site n’affiche qu’une priorité. Le reste disparaît.</span>
+            </button>
+            <button class="mode" data-mode="urgent">
+              <strong>Mode urgence</strong>
+              <span>Priorité aux tâches à fort impact ou sensibles.</span>
+            </button>
+            <button class="mode" data-mode="reset">
+              <strong>Reset mental</strong>
+              <span>Respire, trie, puis repars sur micro-actions.</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Ajouter une tâche manuellement</h2>
+            <div class="panel-subtitle">Quand tu veux être précis.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="task-form-grid">
+            <input id="taskTitle" class="input" type="text" placeholder="Ex: Préparer la réunion ORTEMS" />
+            <div class="inline">
+              <select id="taskPriority" class="select">
+                <option value="high">Priorité haute</option>
+                <option value="medium" selected>Priorité moyenne</option>
+                <option value="low">Priorité basse</option>
+              </select>
+              <select id="taskEnergy" class="select">
+                <option value="high">Énergie haute</option>
+                <option value="medium" selected>Énergie moyenne</option>
+                <option value="low">Énergie basse</option>
+              </select>
+            </div>
+            <button class="btn" id="addTaskBtn">Ajouter</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="center-col">
+      <section class="panel chat">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Assistant intégré</h2>
+            <div class="panel-subtitle">Tu écris ce dont tu as besoin. Il te répond selon tes tâches et ton mode.</div>
+          </div>
+        </div>
+
+        <div class="chat-stream" id="chatStream"></div>
+
+        <div class="assistant-tools">
+          <button class="quick" data-quick="today">
+            <strong>Ma journée</strong>
+            <span>Dis-moi quoi faire maintenant</span>
+          </button>
+          <button class="quick" data-quick="plan">
+            <strong>Plan en 3 étapes</strong>
+            <span>Découpe mon bazar mental</span>
+          </button>
+          <button class="quick" data-quick="focus">
+            <strong>Focus total</strong>
+            <span>Choisis une seule tâche</span>
+          </button>
+          <button class="quick" data-quick="reset">
+            <strong>Reset</strong>
+            <span>Remets-moi à flot</span>
+          </button>
+        </div>
+
+        <div class="composer">
+          <div class="composer-box">
+            <textarea
+              id="chatInput"
+              placeholder="Écris librement : ‘Qu’est-ce que je dois faire aujourd’hui ?’, ‘Aide-moi à me focus’, ‘Je suis en retard’, ‘Découpe-moi ça en petites étapes’..."
+            ></textarea>
+            <div class="composer-actions">
+              <button class="btn primary" id="sendBtn">Envoyer</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="right-col">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Priorité du jour</h2>
+            <div class="panel-subtitle">La meilleure prochaine action à faire maintenant.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="focus-card">
+            <h3 id="todayFocusTitle">Aucune priorité calculée</h3>
+            <div class="focus-item">
+              <strong>Pourquoi</strong>
+              <p id="todayFocusWhy">Ajoute quelques tâches puis clique sur “Que dois-je faire aujourd’hui ?”.</p>
+            </div>
+            <div class="focus-item">
+              <strong>Première action</strong>
+              <p id="todayFocusAction">Le site te proposera une micro-action claire pour éviter le blocage.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Timer de focus</h2>
+            <div class="panel-subtitle">Simple, net, sans distraction.</div>
+          </div>
+        </div>
+        <div class="panel-body timer">
+          <p class="timer-clock" id="timerDisplay">25:00</p>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="timerBar"></div>
+          </div>
+
+          <div class="inline">
+            <button class="btn" id="startTimerBtn">Démarrer 25 min</button>
+            <button class="btn" id="pauseTimerBtn">Pause</button>
+          </div>
+          <div class="inline">
+            <button class="btn" id="shortBreakBtn">Pause 5 min</button>
+            <button class="btn" id="resetTimerBtn">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="tasksPanel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Tes tâches</h2>
+            <div class="panel-subtitle">Le cockpit réel. Pas le blabla.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <h3 class="section-title">À faire</h3>
+          <div class="task-list" id="taskList"></div>
+
+          <div style="height:16px"></div>
+
+          <h3 class="section-title">Terminées</h3>
+          <div class="task-list" id="doneList"></div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="footer-note">
+    Ce prototype tourne entièrement dans ton navigateur avec sauvegarde locale. Donc oui, c’est déjà utile.
+    Mais pour avoir une vraie IA conversationnelle complète comme Claude, il faudra ensuite brancher une API.
+    Là, tu as déjà l’ossature premium + l’intelligence de tri + l’UX de focus.
+  </div>
+
+  <script>
+    const STORAGE_KEY = "patrick-os-v1";
+
+    const state = {
+      tasks: [],
+      mode: "calm",
+      chat: [],
+      timer: {
+        total: 25 * 60,
+        left: 25 * 60,
+        running: false,
+        interval: null
+      }
+    };
+
+    const els = {
+      taskTitle: document.getElementById("taskTitle"),
+      taskPriority: document.getElementById("taskPriority"),
+      taskEnergy: document.getElementById("taskEnergy"),
+      addTaskBtn: document.getElementById("addTaskBtn"),
+      taskList: document.getElementById("taskList"),
+      doneList: document.getElementById("doneList"),
+      statOpen: document.getElementById("statOpen"),
+      statDone: document.getElementById("statDone"),
+      statFocus: document.getElementById("statFocus"),
+      statMode: document.getElementById("statMode"),
+      brainDump: document.getElementById("brainDump"),
+      defaultPriority: document.getElementById("defaultPriority"),
+      defaultEnergy: document.getElementById("defaultEnergy"),
+      convertDumpBtn: document.getElementById("convertDumpBtn"),
+      smartPlanBtn: document.getElementById("smartPlanBtn"),
+      todayFocusTitle: document.getElementById("todayFocusTitle"),
+      todayFocusWhy: document.getElementById("todayFocusWhy"),
+      todayFocusAction: document.getElementById("todayFocusAction"),
+      resetDemoBtn: document.getElementById("resetDemoBtn"),
+      chatStream: document.getElementById("chatStream"),
+      chatInput: document.getElementById("chatInput"),
+      sendBtn: document.getElementById("sendBtn"),
+      timerDisplay: document.getElementById("timerDisplay"),
+      timerBar: document.getElementById("timerBar"),
+      startTimerBtn: document.getElementById("startTimerBtn"),
+      pauseTimerBtn: document.getElementById("pauseTimerBtn"),
+      shortBreakBtn: document.getElementById("shortBreakBtn"),
+      resetTimerBtn: document.getElementById("resetTimerBtn"),
+      tasksPanel: document.getElementById("tasksPanel")
+    };
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 11);
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        tasks: state.tasks,
+        mode: state.mode,
+        chat: state.chat,
+        timer: {
+          total: state.timer.total,
+          left: state.timer.left
+        }
+      }));
+    }
+
+    function load() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      try {
+        const parsed = JSON.parse(raw);
+        state.tasks = parsed.tasks || [];
+        state.mode = parsed.mode || "calm";
+        state.chat = parsed.chat || [];
+        if (parsed.timer) {
+          state.timer.total = parsed.timer.total || 25 * 60;
+          state.timer.left = parsed.timer.left || state.timer.total;
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function addTask(title, priority = "medium", energy = "medium") {
+      const clean = title.trim();
+      if (!clean) return;
+
+      state.tasks.unshift({
+        id: uid(),
+        title: clean,
+        priority,
+        energy,
+        done: false,
+        createdAt: Date.now()
+      });
+
+      save();
+      render();
+    }
+
+    function scoreTask(task) {
+      let score = 0;
+      if (task.done) return -999;
+
+      if (task.priority === "high") score += 60;
+      if (task.priority === "medium") score += 35;
+      if (task.priority === "low") score += 15;
+
+      if (task.energy === "low") score += 20;
+      if (task.energy === "medium") score += 10;
+      if (task.energy === "high") score += 2;
+
+      if (state.mode === "urgent" && task.priority === "high") score += 25;
+      if (state.mode === "single") score += 8;
+      if (state.mode === "reset" && task.energy === "low") score += 20;
+
+      const ageBonus = Math.min(20, Math.floor((Date.now() - task.createdAt) / (1000 * 60 * 60 * 8)));
+      score += ageBonus;
+
+      return score;
+    }
+
+    function getOpenTasks() {
+      return state.tasks.filter(t => !t.done);
+    }
+
+    function getDoneTasks() {
+      return state.tasks.filter(t => t.done);
+    }
+
+    function getBestTask() {
+      const open = getOpenTasks();
+      if (!open.length) return null;
+      return [...open].sort((a, b) => scoreTask(b) - scoreTask(a))[0];
+    }
+
+    function getFocusReason(task) {
+      if (!task) {
+        return {
+          why: "Il n’y a pas encore de matière à prioriser.",
+          action: "Ajoute 3 à 5 tâches réelles, même en vrac."
+        };
+      }
+
+      let why = "C’est le meilleur compromis entre impact et faisabilité maintenant.";
+      let action = "Ouvre le premier support ou document nécessaire, puis travaille dessus 10 minutes sans juger.";
+
+      if (task.priority === "high" && task.energy === "low") {
+        why = "C’est urgent et pourtant assez léger à lancer. Donc parfait pour casser l’inertie.";
+        action = "Fais la première micro-étape maintenant, sans chercher à finir toute la tâche.";
+      } else if (task.priority === "high" && task.energy === "high") {
+        why = "C’est clairement important. Tant que ton cerveau est disponible, il faut taper là-dessus.";
+        action = "Bloque 25 minutes dessus avant d’ouvrir quoi que ce soit d’autre.";
+      } else if (task.energy === "low") {
+        why = "Tu as besoin d’une entrée facile pour reprendre le contrôle sans t’épuiser.";
+        action = "Fais-la en premier pour te remettre en mouvement.";
+      }
+
+      if (state.mode === "reset") {
+        why = "Tu sembles surchargé. Cette tâche a été choisie parce qu’elle est suffisamment simple pour te relancer.";
+        action = "Ignore le reste. Lance uniquement cette mini-action pendant 5 à 10 minutes.";
+      }
+
+      return { why, action };
+    }
+
+    function priorityLabel(priority) {
+      if (priority === "high") return "Priorité haute";
+      if (priority === "low") return "Priorité basse";
+      return "Priorité moyenne";
+    }
+
+    function energyLabel(energy) {
+      if (energy === "high") return "Énergie haute";
+      if (energy === "low") return "Énergie basse";
+      return "Énergie moyenne";
+    }
+
+    function modeLabel(mode) {
+      if (mode === "single") return "Une seule chose";
+      if (mode === "urgent") return "Urgence";
+      if (mode === "reset") return "Reset";
+      return "Calme";
+    }
+
+    function renderTasks() {
+      const open = getOpenTasks().sort((a,b) => scoreTask(b) - scoreTask(a));
+      const done = getDoneTasks().sort((a,b) => b.createdAt - a.createdAt);
+
+      if (state.mode === "single") {
+        const best = getBestTask();
+        els.taskList.innerHTML = best ? taskHTML(best) : emptyHTML("Rien à afficher pour l’instant.");
+      } else {
+        els.taskList.innerHTML = open.length ? open.map(taskHTML).join("") : emptyHTML("Aucune tâche ouverte.");
+      }
+
+      els.doneList.innerHTML = done.length ? done.map(taskHTML).join("") : emptyHTML("Rien de terminé pour l’instant.");
+
+      document.querySelectorAll("[data-action='toggle']").forEach(btn => {
+        btn.onclick = () => toggleTask(btn.dataset.id);
+      });
+
+      document.querySelectorAll("[data-action='delete']").forEach(btn => {
+        btn.onclick = () => deleteTask(btn.dataset.id);
+      });
+
+      document.querySelectorAll("[data-action='boost']").forEach(btn => {
+        btn.onclick = () => boostTask(btn.dataset.id);
+      });
+    }
+
+    function taskHTML(task) {
+      const priorityClass =
+        task.priority === "high" ? "priority-high" :
+        task.priority === "low" ? "priority-low" : "priority-medium";
+
+      return `
+        <div class="task ${task.done ? "done" : ""}">
+          <div class="task-top">
+            <h4 class="task-title">${escapeHtml(task.title)}</h4>
+          </div>
+
+          <div class="task-meta">
+            <span class="pill ${priorityClass}">${priorityLabel(task.priority)}</span>
+            <span class="pill">${energyLabel(task.energy)}</span>
+          </div>
+
+          <div class="task-actions">
+            <button class="ghost-btn" data-action="toggle" data-id="${task.id}">
+              ${task.done ? "Remettre en cours" : "Terminer"}
+            </button>
+            ${!task.done ? `<button class="ghost-btn" data-action="boost" data-id="${task.id}">Mettre en priorité</button>` : ""}
+            <button class="ghost-btn" data-action="delete" data-id="${task.id}">Supprimer</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function emptyHTML(text) {
+      return `<div class="task"><div class="muted">${escapeHtml(text)}</div></div>`;
+    }
+
+    function toggleTask(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      task.done = !task.done;
+      save();
+      render();
+    }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(t => t.id !== id);
+      save();
+      render();
+    }
+
+    function boostTask(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      task.priority = "high";
+      save();
+      render();
+    }
+
+    function renderStats() {
+      const open = getOpenTasks();
+      const done = getDoneTasks();
+      const best = getBestTask();
+
+      els.statOpen.textContent = open.length;
+      els.statDone.textContent = done.length;
+      els.statFocus.textContent = best ? truncate(best.title, 18) : "—";
+      els.statMode.textContent = modeLabel(state.mode);
+    }
+
+    function truncate(str, max) {
+      return str.length > max ? str.slice(0, max - 1) + "…" : str;
+    }
+
+    function renderFocusCard() {
+      const best = getBestTask();
+      const reasons = getFocusReason(best);
+
+      els.todayFocusTitle.textContent = best ? best.title : "Aucune priorité calculée";
+      els.todayFocusWhy.textContent = reasons.why;
+      els.todayFocusAction.textContent = reasons.action;
+    }
+
+    function renderModes() {
+      document.querySelectorAll(".mode").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === state.mode);
+      });
+
+      if (state.mode === "single") {
+        els.tasksPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function renderChat() {
+      if (!state.chat.length) {
+        state.chat = [
+          {
+            role: "ai",
+            text:
+`Je suis ton assistant de focus.
+
+Tu peux me parler normalement.
+Exemples :
+- “Qu’est-ce que je dois faire aujourd’hui ?”
+- “Aide-moi à me focus”
+- “Découpe-moi ma tâche en petites étapes”
+- “Je suis débordé”
+- “Choisis une seule priorité”
+
+Je m’appuie sur tes tâches pour te répondre de manière concrète.`
+          }
+        ];
+      }
+
+      els.chatStream.innerHTML = state.chat.map(msg => `
+        <div class="message">
+          <div class="avatar ${msg.role === "ai" ? "ai" : "user"}">${msg.role === "ai" ? "AI" : "Toi"}</div>
+          <div class="bubble">${escapeHtml(msg.text)}</div>
+        </div>
+      `).join("");
+
+      els.chatStream.scrollTop = els.chatStream.scrollHeight;
+    }
+
+    function pushMessage(role, text) {
+      state.chat.push({ role, text });
+      save();
+      renderChat();
+    }
+
+    function smartTodayResponse() {
+      const best = getBestTask();
+      if (!best) {
+        return `Tu n’as encore aucune tâche solide dans le système.
+
+Ce que tu dois faire maintenant :
+1. vider ce que tu as en tête dans le Brain dump
+2. transformer ça en tâches
+3. relancer la question
+
+Là, le problème n’est pas ton focus. Le problème, c’est l’absence de piste claire.`;
+      }
+
+      const { why, action } = getFocusReason(best);
+      return `Aujourd’hui, ta meilleure cible est :
+
+→ ${best.title}
+
+Pourquoi :
+${why}
+
+Ce que tu fais maintenant :
+${action}
+
+Règle :
+tu n’essaies pas de “tout gérer”.
+Tu protèges juste cette tâche pendant un bloc de focus.`;
+    }
+
+    function planThreeStepsResponse() {
+      const best = getBestTask();
+      const open = getOpenTasks();
+
+      if (!open.length) {
+        return `Tu n’as rien à découper pour l’instant.
+
+Balance 3 à 5 tâches dans le Brain dump, même sale, même mal écrit. Ensuite je t’en fais un plan.`;
+      }
+
+      const target = best || open[0];
+      return `OK, on arrête de tout regarder en même temps.
+
+Plan en 3 étapes pour :
+→ ${target.title}
+
+1. Ouvre ou prépare le support lié à cette tâche.
+2. Fais une version imparfaite ou un premier jet pendant 10 à 15 minutes.
+3. Termine une sortie visible : mail envoyé, slide créée, doc ouvert, brouillon prêt.
+
+Tu n’as pas besoin de motivation.
+Tu as besoin d’une friction plus faible que ton évitement.`;
+    }
+
+    function singleFocusResponse() {
+      const best = getBestTask();
+      if (!best) {
+        return `Je ne peux pas choisir une seule priorité si tu ne m’as rien donné.
+
+Ajoute des tâches. Sinon ton cerveau va continuer à tourner dans le vide.`;
+      }
+
+      state.mode = "single";
+      save();
+      render();
+
+      return `J’ai activé le mode “Une seule chose”.
+
+Ta seule priorité visible maintenant :
+→ ${best.title}
+
+Le reste existe encore, mais tu n’as pas à le regarder.
+Tu n’as qu’un boulot :
+commencer.`;
+    }
+
+    function resetResponse() {
+      state.mode = "reset";
+      save();
+      render();
+
+      return `On fait simple.
+
+Reset mental :
+1. expire lentement 3 fois
+2. lis uniquement la priorité du jour
+3. engage-toi sur 5 minutes, pas plus
+
+Tu n’es pas obligé d’avoir envie.
+Tu dois juste réduire la résistance d’entrée.`;
+    }
+
+    function taskBreakdownResponse(userText) {
+      const best = getBestTask();
+      const target = best ? best.title : "ta tâche principale";
+
+      return `Je te découpe ça très simplement pour : ${target}
+
+- étape 1 : définir exactement le livrable attendu
+- étape 2 : ouvrir les documents ou outils nécessaires
+- étape 3 : produire une première version moche mais réelle
+- étape 4 : corriger et envoyer / finaliser
+
+Règle d’or :
+ne commence jamais par “bien faire”.
+Commence par “faire exister”.`;
+    }
+
+    function assistantReply(input) {
+      const text = input.toLowerCase().trim();
+
+      if (!text) {
+        return "Écris-moi vraiment ce que tu veux faire ou ce qui te bloque.";
+      }
+
+      if (text.includes("aujourd") || text.includes("quoi faire") || text.includes("priorit")) {
+        return smartTodayResponse();
+      }
+
+      if (text.includes("plan") || text.includes("organise") || text.includes("organiser") || text.includes("3 étapes")) {
+        return planThreeStepsResponse();
+      }
+
+      if (text.includes("focus") || text.includes("concentr") || text.includes("une seule")) {
+        return singleFocusResponse();
+      }
+
+      if (text.includes("reset") || text.includes("débord") || text.includes("debord") || text.includes("perdu") || text.includes("satur")) {
+        return resetResponse();
+      }
+
+      if (text.includes("découpe") || text.includes("decoupe") || text.includes("étape") || text.includes("micro")) {
+        return taskBreakdownResponse(input);
+      }
+
+      if (text.includes("retard") || text.includes("urgent")) {
+        state.mode = "urgent";
+        save();
+        render();
+        return `J’ai basculé en mode urgence.
+
+On arrête le perfectionnisme.
+On cherche ce qui a le plus d’impact immédiat, puis on exécute vite.
+Clique sur “Que dois-je faire aujourd’hui ?” ou laisse-moi choisir la priorité
