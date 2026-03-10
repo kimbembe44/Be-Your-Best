@@ -1,1470 +1,377 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patrick OS — Focus, organisation et assistant personnel</title>
-  <meta
-    name="description"
-    content="Espace personnel premium pour organiser ses tâches, garder le focus et dialoguer avec un assistant intelligent."
-  />
-  <style>
-    :root{
-      --bg: #0a0a0f;
-      --bg-soft: #11131a;
-      --panel: rgba(255,255,255,.06);
-      --panel-strong: rgba(255,255,255,.10);
-      --text: #f5f7fb;
-      --muted: #aab1c3;
-      --line: rgba(255,255,255,.10);
-      --accent: #7c9cff;
-      --accent-2: #9bffd3;
-      --danger: #ff7b7b;
-      --warning: #ffca6b;
-      --success: #7effb2;
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-      --radius: 24px;
-      --radius-sm: 18px;
-      --max: 1400px;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(124,156,255,.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(155,255,211,.10), transparent 24%),
-        linear-gradient(180deg, #08090d 0%, #0d1118 45%, #090b10 100%);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .noise::before{
-      content:"";
-      position: fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.05;
-      background-image:
-        radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 1px),
-        radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 1px),
-        radial-gradient(circle at 40% 80%, #fff 0 1px, transparent 1px);
-      background-size: 240px 240px;
-      mix-blend-mode: soft-light;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      background: rgba(10,12,18,.55);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .topbar-inner {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.03)),
-        linear-gradient(135deg, rgba(124,156,255,.8), rgba(155,255,211,.45));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.20), 0 10px 30px rgba(124,156,255,.18);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      letter-spacing: -.04em;
-    }
-
-    .brand-text {
-      min-width: 0;
-    }
-
-    .brand-text strong {
-      display: block;
-      font-size: 0.98rem;
-      letter-spacing: -.02em;
-    }
-
-    .brand-text span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.82rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    button, input, textarea, select {
-      font: inherit;
-    }
-
-    .btn {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: .22s ease;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.18);
-      background: rgba(255,255,255,.10);
-    }
-
-    .btn.primary {
-      background: linear-gradient(135deg, rgba(124,156,255,.25), rgba(155,255,211,.14));
-      border-color: rgba(124,156,255,.35);
-      box-shadow: 0 12px 30px rgba(124,156,255,.15);
-    }
-
-    .btn.danger {
-      border-color: rgba(255,123,123,.25);
-      background: rgba(255,123,123,.08);
-      color: #ffd4d4;
-    }
-
-    .hero {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 56px 24px 18px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.05);
-      color: var(--muted);
-      font-size: .92rem;
-      margin-bottom: 18px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .hero h1 {
-      margin: 0;
-      font-size: clamp(2.8rem, 7vw, 6.5rem);
-      line-height: .94;
-      letter-spacing: -.06em;
-      max-width: 1100px;
-    }
-
-    .hero h1 .gradient {
-      background: linear-gradient(135deg, #ffffff 0%, #cdd7ff 40%, #b4ffe4 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero p {
-      max-width: 800px;
-      color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.22rem);
-      line-height: 1.7;
-      margin: 20px 0 0;
-    }
-
-    .hero-grid {
-      margin-top: 28px;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 14px;
-    }
-
-    .stat-card {
-      padding: 18px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      min-height: 104px;
-    }
-
-    .stat-card span {
-      display: block;
-      color: var(--muted);
-      font-size: .9rem;
-      margin-bottom: 8px;
-    }
-
-    .stat-card strong {
-      font-size: 2rem;
-      letter-spacing: -.05em;
-      display: block;
-    }
-
-    .app-shell {
-      max-width: var(--max);
-      margin: 24px auto 50px;
-      padding: 0 24px 48px;
-      display: grid;
-      grid-template-columns: 320px minmax(0,1fr) 360px;
-      gap: 18px;
-    }
-
-    .panel {
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.04));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 18px 18px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .panel-title {
-      font-size: 1.05rem;
-      letter-spacing: -.03em;
-      margin: 0;
-    }
-
-    .panel-subtitle {
-      color: var(--muted);
-      font-size: .88rem;
-      margin-top: 6px;
-    }
-
-    .panel-body {
-      padding: 18px;
-    }
-
-    .left-col, .right-col, .center-col {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .input, .textarea, .select {
-      width: 100%;
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,.10);
-      outline: none;
-      border-radius: 18px;
-      padding: 14px 16px;
-      transition: .18s ease;
-    }
-
-    .textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    .input:focus, .textarea:focus, .select:focus {
-      border-color: rgba(124,156,255,.55);
-      box-shadow: 0 0 0 4px rgba(124,156,255,.10);
-      background: rgba(255,255,255,.08);
-    }
-
-    .task-form-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .inline {
-      display: flex;
-      gap: 10px;
-    }
-
-    .inline > * { flex: 1; }
-
-    .hint {
-      font-size: .85rem;
-      color: var(--muted);
-      line-height: 1.5;
-      margin-top: 10px;
-    }
-
-    .modes {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .mode {
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      padding: 14px;
-      cursor: pointer;
-      transition: .2s ease;
-      text-align: left;
-      color: var(--text);
-    }
-
-    .mode:hover, .mode.active {
-      background: rgba(255,255,255,.10);
-      transform: translateY(-1px);
-      border-color: rgba(124,156,255,.40);
-    }
-
-    .mode strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: .96rem;
-    }
-
-    .mode span {
-      color: var(--muted);
-      font-size: .85rem;
-      line-height: 1.45;
-    }
-
-    .chat {
-      min-height: 680px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-stream {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-height: 620px;
-      overflow: auto;
-    }
-
-    .message {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      animation: fadeUp .25s ease;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      flex: 0 0 auto;
-      display: grid;
-      place-items: center;
-      font-size: .9rem;
-      font-weight: 700;
-      border: 1px solid var(--line);
-    }
-
-    .avatar.ai {
-      background: linear-gradient(145deg, rgba(124,156,255,.25), rgba(155,255,211,.18));
-    }
-
-    .avatar.user {
-      background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-    }
-
-    .bubble {
-      flex: 1;
-      border-radius: 22px;
-      padding: 16px 18px;
-      line-height: 1.65;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      white-space: pre-wrap;
-    }
-
-    .bubble strong {
-      letter-spacing: -.02em;
-    }
-
-    .assistant-tools {
-      padding: 0 18px 18px;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 10px;
-    }
-
-    .quick {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      border-radius: 18px;
-      padding: 12px;
-      text-align: left;
-      cursor: pointer;
-      transition: .2s ease;
-      min-height: 76px;
-    }
-
-    .quick:hover {
-      background: rgba(255,255,255,.10);
-      transform: translateY(-1px);
-    }
-
-    .quick strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: .92rem;
-    }
-
-    .quick span {
-      color: var(--muted);
-      font-size: .82rem;
-      line-height: 1.35;
-    }
-
-    .composer {
-      padding: 18px;
-      border-top: 1px solid var(--line);
-      background: rgba(0,0,0,.12);
-    }
-
-    .composer-box {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      border-radius: 26px;
-      padding: 12px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-    }
-
-    .composer textarea {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      resize: none;
-      min-height: 56px;
-      max-height: 180px;
-      width: 100%;
-      padding: 10px 12px;
-    }
-
-    .composer-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .badge-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .badge {
-      font-size: .78rem;
-      color: var(--muted);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 10px;
-      background: rgba(255,255,255,.04);
-    }
-
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 380px;
-      overflow: auto;
-    }
-
-    .task {
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      display: grid;
-      gap: 8px;
-    }
-
-    .task-top {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      justify-content: space-between;
-    }
-
-    .task-title {
-      margin: 0;
-      font-size: .96rem;
-      line-height: 1.35;
-      letter-spacing: -.02em;
-    }
-
-    .task.done .task-title {
-      text-decoration: line-through;
-      color: var(--muted);
-    }
-
-    .task-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .pill {
-      font-size: .76rem;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-    }
-
-    .priority-high { color: #ffd0d0; border-color: rgba(255,123,123,.22); background: rgba(255,123,123,.08); }
-    .priority-medium { color: #ffe8bf; border-color: rgba(255,202,107,.22); background: rgba(255,202,107,.08); }
-    .priority-low { color: #cfffe2; border-color: rgba(126,255,178,.22); background: rgba(126,255,178,.08); }
-
-    .task-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .ghost-btn {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: .18s ease;
-    }
-
-    .ghost-btn:hover {
-      background: rgba(255,255,255,.08);
-    }
-
-    .focus-card {
-      padding: 18px;
-      border-radius: 24px;
-      background:
-        radial-gradient(circle at top right, rgba(124,156,255,.18), transparent 34%),
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      border: 1px solid var(--line);
-    }
-
-    .focus-card h3 {
-      margin: 0 0 10px;
-      font-size: 1.2rem;
-      letter-spacing: -.03em;
-    }
-
-    .focus-item {
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-
-    .focus-item strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: .98rem;
-    }
-
-    .focus-item p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: .92rem;
-    }
-
-    .timer {
-      display: grid;
-      gap: 12px;
-    }
-
-    .timer-clock {
-      font-size: 3rem;
-      letter-spacing: -.06em;
-      margin: 0;
-    }
-
-    .progress-wrap {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      overflow: hidden;
-      border: 1px solid var(--line);
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, rgba(124,156,255,.95), rgba(155,255,211,.95));
-      transition: width .8s linear;
-    }
-
-    .section-title {
-      margin: 0 0 12px;
-      font-size: 1rem;
-      letter-spacing: -.03em;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .footer-note {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 0 24px 50px;
-      color: var(--muted);
-      font-size: .92rem;
-      line-height: 1.7;
-    }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 1180px) {
-      .app-shell {
-        grid-template-columns: 1fr;
-      }
-      .assistant-tools {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-      .hero-grid {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-    }
-
-    @media (max-width: 740px) {
-      .topbar-inner,
-      .hero,
-      .app-shell,
-      .footer-note {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .hero {
-        padding-top: 30px;
-      }
-
-      .hero-grid,
-      .assistant-tools,
-      .modes {
-        grid-template-columns: 1fr;
-      }
-
-      .inline {
-        flex-direction: column;
-      }
-
-      .top-actions {
-        width: 100%;
-        justify-content: flex-start;
-      }
-
-      .topbar-inner {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Empire">
+<title>Empire — Be Your Best</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#f5f5f7;--white:#fff;--text:#1d1d1f;--t2:#6e6e73;--t3:#aeaeb2;
+--border:rgba(0,0,0,0.08);--orange:#ff6b35;--ol:#fff3ef;
+--blue:#0071e3;--bl:#e8f1fb;--green:#34c759;--gl:#edfaf2;
+--yellow:#ffcc00;--yl:#fffaed;--purple:#af52de;--pl:#f5edfb;
+--sh:0 1px 3px rgba(0,0,0,0.06);--r:18px;--r2:24px;
+--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex;animation:fs .28s ease}
+@keyframes fs{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.topbar{background:rgba(245,245,247,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:calc(var(--st) + 14px) 20px 14px;position:sticky;top:0;z-index:100}
+.ti{display:flex;align-items:center;justify-content:space-between}
+.tl{display:flex;flex-direction:column}
+.tg{font-size:13px;color:var(--t2);font-weight:500}
+.tt{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
+.tav{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff8c42);display:flex;align-items:center;justify-content:center;font-size:18px}
+.scroll{flex:1;overflow-y:auto;padding:20px 16px calc(100px + var(--sb));-webkit-overflow-scrolling:touch}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:8px 8px calc(var(--sb) + 8px);display:flex;justify-content:space-around;z-index:200}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;border-radius:14px;cursor:pointer;border:none;background:none;color:var(--t3);transition:all .2s;min-width:55px}
+.nb.on{color:var(--blue);background:var(--bl)}
+.ni{font-size:22px;line-height:1}
+.nl{font-size:10px;font-weight:600;letter-spacing:.2px}
+.card{background:var(--white);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh);border:1px solid var(--border)}
+.ct{font-size:13px;font-weight:600;color:var(--t2);letter-spacing:.3px;text-transform:uppercase;margin-bottom:14px}
+.fc{background:var(--text);border-radius:var(--r2);padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.fc::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.04);border-radius:50%}
+.ftag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);background:rgba(255,107,53,.15);padding:4px 10px;border-radius:20px;margin-bottom:14px}
+.flbl{font-size:13px;color:rgba(255,255,255,.5);font-weight:500;margin-bottom:6px}
+.ftask{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px;line-height:1.2;margin-bottom:10px}
+.fdesc{font-size:14px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:20px}
+.frow{display:flex;gap:10px}
+.bdone{flex:1;padding:13px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.bskip{padding:13px 20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.sc{background:linear-gradient(135deg,#ff6b35,#ff8c42);border-radius:var(--r);padding:20px;margin-bottom:14px;color:#fff;display:flex;align-items:center;gap:16px}
+.si{font-size:44px;flex-shrink:0}
+.sn{font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1}
+.sl{font-size:13px;opacity:.85;font-weight:500;margin-top:2px}
+.sm{font-size:12px;opacity:.65;margin-top:4px;line-height:1.4}
+.pr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.pm{background:var(--white);border-radius:var(--r);padding:16px 12px;text-align:center;border:1px solid var(--border);box-shadow:var(--sh)}
+.pmn{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.pml{font-size:10px;font-weight:600;color:var(--t2);margin-top:4px;letter-spacing:.3px}
+.pmb{height:3px;background:var(--bg);border-radius:10px;margin-top:10px;overflow:hidden}
+.pmbf{height:100%;border-radius:10px;transition:width 1s ease}
+.cc{background:linear-gradient(135deg,#0071e3,#5ac8fa);border-radius:var(--r);padding:20px;margin-bottom:14px;color:#fff}
+.cct{font-size:16px;font-weight:700;margin-bottom:4px}
+.ccs{font-size:12px;opacity:.7;margin-bottom:16px}
+.ccu{display:flex;gap:8px}
+.cu{flex:1;background:rgba(255,255,255,.2);border-radius:10px;padding:10px 6px;text-align:center}
+.cun{font-size:26px;font-weight:800;line-height:1}
+.cul{font-size:9px;opacity:.65;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.qc{background:var(--pl);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;border:1px solid rgba(175,82,222,.12)}
+.qm{font-size:48px;line-height:.8;color:var(--purple);opacity:.3;font-family:Georgia,serif;margin-bottom:8px}
+.qt{font-size:16px;color:var(--text);line-height:1.6;font-style:italic;margin-bottom:10px}
+.qa{font-size:12px;color:var(--purple);font-weight:700}
+.qrb{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:rgba(175,82,222,.12);border:none;color:var(--purple);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ptabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;padding:7px 16px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--t2);transition:all .2s;white-space:nowrap}
+.ptab.on{border-color:transparent;color:#fff}
+.ptab.on.tall{background:var(--text)}
+.ptab.on.t1{background:var(--orange)}
+.ptab.on.t2{background:var(--yellow);color:var(--text)}
+.ptab.on.t3{background:var(--green)}
+.mlbl{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--text);margin:20px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.mc{font-size:13px;font-weight:600;color:var(--t3)}
+.tr{background:var(--white);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:transform .15s;border:1px solid var(--border);box-shadow:var(--sh);position:relative;overflow:hidden}
+.tr::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.tr.p1::before{background:var(--orange)}.tr.p2::before{background:var(--yellow)}.tr.p3::before{background:var(--green)}
+.tr:active{transform:scale(.985)}
+.tr.done{opacity:.45}
+.tr.done .tn{text-decoration:line-through}
+.teb{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.p1 .teb{background:var(--ol)}.p2 .teb{background:var(--yl)}.p3 .teb{background:var(--gl)}.done .teb{background:var(--bg)}
+.tb{flex:1;min-width:0}
+.tch{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;display:inline-block;margin-bottom:4px}
+.ch1{background:var(--ol);color:var(--orange)}.ch2{background:var(--yl);color:#b07b00}.ch3{background:var(--gl);color:#1a7a3a}
+.tn{font-size:15px;font-weight:600;line-height:1.3;margin-bottom:3px;color:var(--text)}
+.tdd{font-size:12px;color:var(--t2);line-height:1.4}
+.tck{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:2px;transition:all .2s;background:var(--white)}
+.tr.done .tck{background:var(--green);border-color:var(--green);color:#fff}
+.aitop{background:var(--text);padding:calc(var(--st)+16px) 20px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.aiav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ain{font-size:16px;font-weight:700;color:#fff}
+.ais2{font-size:11px;color:rgba(255,255,255,.5)}
+.aiscroll{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg);-webkit-overflow-scrolling:touch}
+.msg{max-width:82%;display:flex;flex-direction:column;gap:4px}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.ai{align-self:flex-start;align-items:flex-start}
+.mb{padding:12px 16px;border-radius:18px;font-size:15px;line-height:1.5}
+.msg.user .mb{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.ai .mb{background:var(--white);color:var(--text);border-bottom-left-radius:4px;box-shadow:var(--sh);border:1px solid var(--border)}
+.mt2{font-size:10px;color:var(--t3);padding:0 4px}
+.typing2{display:flex;gap:4px;align-items:center;padding:14px 18px}
+.td3{width:7px;height:7px;border-radius:50%;background:var(--t3);animation:bl 1.4s infinite}
+.td3:nth-child(2){animation-delay:.2s}.td3:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.3;transform:scale(1)}40%{opacity:1;transform:scale(1.2)}}
+.aibar{background:var(--white);border-top:1px solid var(--border);padding:12px 16px calc(var(--sb)+80px);display:flex;align-items:flex-end;gap:10px}
+.aiinput{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;font-family:inherit;font-size:15px;color:var(--text);outline:none;resize:none;max-height:120px;transition:border-color .2s;line-height:1.4;min-height:42px}
+.aiinput:focus{border-color:var(--blue)}
+.aisend{width:42px;height:42px;border-radius:50%;background:var(--blue);border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.aisugg{display:flex;gap:8px;overflow-x:auto;padding:10px 16px 0;scrollbar-width:none;background:var(--white)}
+.aisugg::-webkit-scrollbar{display:none}
+.sgch{flex-shrink:0;padding:7px 14px;border-radius:100px;background:var(--bg);border:1.5px solid var(--border);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap}
+.fgrp{margin-bottom:16px}
+.flb{font-size:12px;font-weight:700;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:8px}
+.finp,.fsel{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;font-family:inherit;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.finp:focus,.fsel:focus{border-color:var(--blue)}
+.bprim{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-.2px}
+.rrow{background:var(--white);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;border:1px solid var(--border);box-shadow:var(--sh)}
+.rtb{text-align:center;flex-shrink:0}
+.rtbig{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--orange);line-height:1}
+.rtam{font-size:10px;color:var(--t3);letter-spacing:.5px}
+.ri{flex:1}
+.rit{font-size:15px;font-weight:600;margin-bottom:2px}
+.rid{font-size:12px;color:var(--t2)}
+.tog{width:48px;height:28px;border-radius:14px;background:var(--t3);position:relative;cursor:pointer;transition:background .25s;flex-shrink:0}
+.tog.on{background:var(--green)}
+.togk{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tog.on .togk{transform:translateX(20px)}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;display:none;align-items:flex-end}
+.mbg.open{display:flex}
+.msh{width:100%;background:var(--white);border-radius:var(--r2) var(--r2) 0 0;padding:24px 20px calc(32px + var(--sb));animation:su .32s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhnd{width:40px;height:4px;background:var(--bg);border-radius:2px;margin:0 auto 24px}
+.mtt{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:20px;color:var(--text)}
+.dprow{display:flex;gap:8px;flex-wrap:wrap}
+.dp{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.dp.on{background:var(--text);border-color:var(--text);color:#fff}
+.mbtns{display:flex;gap:10px;margin-top:24px}
+.bcanc{padding:14px 20px;background:var(--bg);color:var(--t2);border:none;border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer}
+.toast{position:fixed;top:calc(var(--st)+16px);left:16px;right:16px;background:var(--text);color:#fff;border-radius:14px;padding:14px 18px;z-index:1000;display:none;box-shadow:0 12px 40px rgba(0,0,0,.12);flex-direction:row;align-items:center;gap:12px;animation:ti .3s ease}
+.toast.show{display:flex}
+@keyframes ti{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.tci{font-size:20px}.tct{flex:1}.tch2{font-size:14px;font-weight:700}.tcb{font-size:12px;opacity:.6;margin-top:1px}
+.ibar{background:var(--ol);border:1.5px solid rgba(255,107,53,.2);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;font-size:13px}
+.ibar span{flex:1;color:var(--text);line-height:1.5}
+.ibar button{background:none;border:none;font-size:16px;color:var(--t3);cursor:pointer;flex-shrink:0;padding:0}
+.divider{font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--text);margin:22px 0 12px}
+.addout{width:100%;padding:15px;background:var(--white);border:1.5px dashed var(--border);border-radius:var(--r);color:var(--t2);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-bottom:10px}
+.empty{text-align:center;padding:50px 20px;color:var(--t2)}
+.emico{font-size:50px;margin-bottom:14px}
+.empty p{font-size:14px;line-height:1.6}
+</style>
 </head>
-<body class="noise">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="logo">P</div>
-        <div class="brand-text">
-          <strong>Patrick OS</strong>
-          <span>Ton cockpit personnel pour décider, prioriser et avancer</span>
-        </div>
-      </div>
+<body>
+<div class="toast" id="toast"><div class="tci" id="tci"></div><div class="tct"><div class="tch2" id="tch"></div><div class="tcb" id="tcb"></div></div></div>
 
-      <div class="top-actions">
-        <button class="btn" id="resetDemoBtn">Réinitialiser les données</button>
-        <button class="btn primary" id="smartPlanBtn">Que dois-je faire aujourd’hui ?</button>
+<!-- HOME -->
+
+<div class="screen active" id="s-home">
+  <div class="topbar"><div class="ti"><div class="tl"><div class="tg" id="greet"></div><div class="tt">Empire Digital 🔥</div></div><div class="tav">👤</div></div></div>
+  <div class="scroll">
+    <div class="ibar" id="ibar"><span>📲</span><span><strong>Installer :</strong> Safari &rarr; Partager &rarr; "Sur l&apos;écran d&apos;accueil"</span><button onclick="dismissI()">&#x2715;</button></div>
+    <div class="fc">
+      <div class="ftag">&#x26A1; Focus du jour</div>
+      <div class="flbl">Ta seule tâche maintenant :</div>
+      <div class="ftask" id="ftask">Chargement&hellip;</div>
+      <div class="fdesc" id="fdesc"></div>
+      <div class="frow"><button class="bdone" onclick="doneToday()">&#x2713; C&apos;est fait !</button><button class="bskip" onclick="skipFocus()">Passer &rarr;</button></div>
+    </div>
+    <div class="sc"><div class="si">&#x1F525;</div><div><div class="sn" id="sn">0</div><div class="sl">jours cons&eacute;cutifs</div><div class="sm" id="sm">Commence aujourd&apos;hui !</div></div></div>
+    <div class="pr">
+      <div class="pm"><div class="pmn" id="p1p" style="color:var(--orange)">0%</div><div class="pml">TikTok/YT</div><div class="pmb"><div class="pmbf" id="p1b" style="background:var(--orange);width:0%"></div></div></div>
+      <div class="pm"><div class="pmn" id="p2p" style="color:#b07b00">0%</div><div class="pml">Marque</div><div class="pmb"><div class="pmbf" id="p2b" style="background:var(--yellow);width:0%"></div></div></div>
+      <div class="pm"><div class="pmn" id="p3p" style="color:var(--green)">0%</div><div class="pml">Code</div><div class="pmb"><div class="pmbf" id="p3b" style="background:var(--green);width:0%"></div></div></div>
+    </div>
+    <div class="cc">
+      <div class="cct">&#x1F3AF; 10 000 abonn&eacute;s TikTok</div>
+      <div class="ccs">Objectif Phase 1 &middot; Mai 2026</div>
+      <div class="ccu">
+        <div class="cu"><div class="cun" id="cdD">00</div><div class="cul">Jours</div></div>
+        <div class="cu"><div class="cun" id="cdH">00</div><div class="cul">Heures</div></div>
+        <div class="cu"><div class="cun" id="cdM">00</div><div class="cul">Min</div></div>
+        <div class="cu"><div class="cun" id="cdS">00</div><div class="cul">Sec</div></div>
       </div>
     </div>
-  </header>
-
-  <section class="hero">
-    <div class="eyebrow">Focus guidé • Organisation anti-dispersion • Assistant personnel intégré</div>
-    <h1>
-      Un espace pour <span class="gradient">penser moins</span>,
-      choisir mieux, et agir maintenant.
-    </h1>
-    <p>
-      Tu balances tout ce que tu as en tête. Le site trie, priorise, te propose une seule vraie
-      prochaine action, puis t’aide à rester dessus. Pas un gadget. Un vrai cockpit pour les jours
-      où ton cerveau part dans 12 directions en même temps.
-    </p>
-
-    <div class="hero-grid">
-      <div class="stat-card">
-        <span>Tâches ouvertes</span>
-        <strong id="statOpen">0</strong>
-      </div>
-      <div class="stat-card">
-        <span>Tâches terminées</span>
-        <strong id="statDone">0</strong>
-      </div>
-      <div class="stat-card">
-        <span>Focus du jour</span>
-        <strong id="statFocus">—</strong>
-      </div>
-      <div class="stat-card">
-        <span>Mode actuel</span>
-        <strong id="statMode">Calme</strong>
-      </div>
+    <div class="qc">
+      <button class="qrb" onclick="nxtQ()">&#x21BB;</button>
+      <div class="qm">&ldquo;</div>
+      <div class="qt" id="qt"></div>
+      <div class="qa" id="qa"></div>
     </div>
-  </section>
-
-  <main class="app-shell">
-    <aside class="left-col">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Brain dump</h2>
-            <div class="panel-subtitle">Vide ta tête ici. Le site convertit ça en tâches.</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="task-form-grid">
-            <textarea
-              id="brainDump"
-              class="textarea"
-              placeholder="Exemple :
-- appeler Sandra pour le CTP
-- finir le support de présentation
-- acheter une chemise noire
-- planifier la semaine
-- répondre au mail de Guillaume"
-            ></textarea>
-
-            <div class="inline">
-              <select id="defaultPriority" class="select">
-                <option value="medium">Priorité moyenne par défaut</option>
-                <option value="high">Priorité haute par défaut</option>
-                <option value="low">Priorité basse par défaut</option>
-              </select>
-              <select id="defaultEnergy" class="select">
-                <option value="medium">Énergie moyenne</option>
-                <option value="high">Énergie haute</option>
-                <option value="low">Énergie basse</option>
-              </select>
-            </div>
-
-            <button class="btn primary" id="convertDumpBtn">Transformer en tâches</button>
-            <div class="hint">
-              Mets une ligne par idée, ou sépare avec des virgules / points-virgules.
-              Pas besoin d’être propre. Le but, c’est de sortir le bazar mental.
-            </div>
-          </div>
-
-          <div class="badge-row">
-            <span class="badge">TDAH friendly</span>
-            <span class="badge">Sauvegarde locale</span>
-            <span class="badge">Décision rapide</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Modes de focus</h2>
-            <div class="panel-subtitle">Tu changes l’interface selon ton état mental.</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="modes">
-            <button class="mode active" data-mode="calm">
-              <strong>Mode calme</strong>
-              <span>Affichage équilibré. Tu vois tout, sans surcharge.</span>
-            </button>
-            <button class="mode" data-mode="single">
-              <strong>Une seule chose</strong>
-              <span>Le site n’affiche qu’une priorité. Le reste disparaît.</span>
-            </button>
-            <button class="mode" data-mode="urgent">
-              <strong>Mode urgence</strong>
-              <span>Priorité aux tâches à fort impact ou sensibles.</span>
-            </button>
-            <button class="mode" data-mode="reset">
-              <strong>Reset mental</strong>
-              <span>Respire, trie, puis repars sur micro-actions.</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Ajouter une tâche manuellement</h2>
-            <div class="panel-subtitle">Quand tu veux être précis.</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="task-form-grid">
-            <input id="taskTitle" class="input" type="text" placeholder="Ex: Préparer la réunion ORTEMS" />
-            <div class="inline">
-              <select id="taskPriority" class="select">
-                <option value="high">Priorité haute</option>
-                <option value="medium" selected>Priorité moyenne</option>
-                <option value="low">Priorité basse</option>
-              </select>
-              <select id="taskEnergy" class="select">
-                <option value="high">Énergie haute</option>
-                <option value="medium" selected>Énergie moyenne</option>
-                <option value="low">Énergie basse</option>
-              </select>
-            </div>
-            <button class="btn" id="addTaskBtn">Ajouter</button>
-          </div>
-        </div>
-      </section>
-    </aside>
-
-    <section class="center-col">
-      <section class="panel chat">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Assistant intégré</h2>
-            <div class="panel-subtitle">Tu écris ce dont tu as besoin. Il te répond selon tes tâches et ton mode.</div>
-          </div>
-        </div>
-
-        <div class="chat-stream" id="chatStream"></div>
-
-        <div class="assistant-tools">
-          <button class="quick" data-quick="today">
-            <strong>Ma journée</strong>
-            <span>Dis-moi quoi faire maintenant</span>
-          </button>
-          <button class="quick" data-quick="plan">
-            <strong>Plan en 3 étapes</strong>
-            <span>Découpe mon bazar mental</span>
-          </button>
-          <button class="quick" data-quick="focus">
-            <strong>Focus total</strong>
-            <span>Choisis une seule tâche</span>
-          </button>
-          <button class="quick" data-quick="reset">
-            <strong>Reset</strong>
-            <span>Remets-moi à flot</span>
-          </button>
-        </div>
-
-        <div class="composer">
-          <div class="composer-box">
-            <textarea
-              id="chatInput"
-              placeholder="Écris librement : ‘Qu’est-ce que je dois faire aujourd’hui ?’, ‘Aide-moi à me focus’, ‘Je suis en retard’, ‘Découpe-moi ça en petites étapes’..."
-            ></textarea>
-            <div class="composer-actions">
-              <button class="btn primary" id="sendBtn">Envoyer</button>
-            </div>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <aside class="right-col">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Priorité du jour</h2>
-            <div class="panel-subtitle">La meilleure prochaine action à faire maintenant.</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="focus-card">
-            <h3 id="todayFocusTitle">Aucune priorité calculée</h3>
-            <div class="focus-item">
-              <strong>Pourquoi</strong>
-              <p id="todayFocusWhy">Ajoute quelques tâches puis clique sur “Que dois-je faire aujourd’hui ?”.</p>
-            </div>
-            <div class="focus-item">
-              <strong>Première action</strong>
-              <p id="todayFocusAction">Le site te proposera une micro-action claire pour éviter le blocage.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Timer de focus</h2>
-            <div class="panel-subtitle">Simple, net, sans distraction.</div>
-          </div>
-        </div>
-        <div class="panel-body timer">
-          <p class="timer-clock" id="timerDisplay">25:00</p>
-          <div class="progress-wrap">
-            <div class="progress-bar" id="timerBar"></div>
-          </div>
-
-          <div class="inline">
-            <button class="btn" id="startTimerBtn">Démarrer 25 min</button>
-            <button class="btn" id="pauseTimerBtn">Pause</button>
-          </div>
-          <div class="inline">
-            <button class="btn" id="shortBreakBtn">Pause 5 min</button>
-            <button class="btn" id="resetTimerBtn">Reset</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel" id="tasksPanel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Tes tâches</h2>
-            <div class="panel-subtitle">Le cockpit réel. Pas le blabla.</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <h3 class="section-title">À faire</h3>
-          <div class="task-list" id="taskList"></div>
-
-          <div style="height:16px"></div>
-
-          <h3 class="section-title">Terminées</h3>
-          <div class="task-list" id="doneList"></div>
-        </div>
-      </section>
-    </aside>
-  </main>
-
-  <div class="footer-note">
-    Ce prototype tourne entièrement dans ton navigateur avec sauvegarde locale. Donc oui, c’est déjà utile.
-    Mais pour avoir une vraie IA conversationnelle complète comme Claude, il faudra ensuite brancher une API.
-    Là, tu as déjà l’ossature premium + l’intelligence de tri + l’UX de focus.
   </div>
-
-  <script>
-    const STORAGE_KEY = "patrick-os-v1";
-
-    const state = {
-      tasks: [],
-      mode: "calm",
-      chat: [],
-      timer: {
-        total: 25 * 60,
-        left: 25 * 60,
-        running: false,
-        interval: null
-      }
-    };
-
-    const els = {
-      taskTitle: document.getElementById("taskTitle"),
-      taskPriority: document.getElementById("taskPriority"),
-      taskEnergy: document.getElementById("taskEnergy"),
-      addTaskBtn: document.getElementById("addTaskBtn"),
-      taskList: document.getElementById("taskList"),
-      doneList: document.getElementById("doneList"),
-      statOpen: document.getElementById("statOpen"),
-      statDone: document.getElementById("statDone"),
-      statFocus: document.getElementById("statFocus"),
-      statMode: document.getElementById("statMode"),
-      brainDump: document.getElementById("brainDump"),
-      defaultPriority: document.getElementById("defaultPriority"),
-      defaultEnergy: document.getElementById("defaultEnergy"),
-      convertDumpBtn: document.getElementById("convertDumpBtn"),
-      smartPlanBtn: document.getElementById("smartPlanBtn"),
-      todayFocusTitle: document.getElementById("todayFocusTitle"),
-      todayFocusWhy: document.getElementById("todayFocusWhy"),
-      todayFocusAction: document.getElementById("todayFocusAction"),
-      resetDemoBtn: document.getElementById("resetDemoBtn"),
-      chatStream: document.getElementById("chatStream"),
-      chatInput: document.getElementById("chatInput"),
-      sendBtn: document.getElementById("sendBtn"),
-      timerDisplay: document.getElementById("timerDisplay"),
-      timerBar: document.getElementById("timerBar"),
-      startTimerBtn: document.getElementById("startTimerBtn"),
-      pauseTimerBtn: document.getElementById("pauseTimerBtn"),
-      shortBreakBtn: document.getElementById("shortBreakBtn"),
-      resetTimerBtn: document.getElementById("resetTimerBtn"),
-      tasksPanel: document.getElementById("tasksPanel")
-    };
-
-    function uid() {
-      return Math.random().toString(36).slice(2, 11);
-    }
-
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        tasks: state.tasks,
-        mode: state.mode,
-        chat: state.chat,
-        timer: {
-          total: state.timer.total,
-          left: state.timer.left
-        }
-      }));
-    }
-
-    function load() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return false;
-      try {
-        const parsed = JSON.parse(raw);
-        state.tasks = parsed.tasks || [];
-        state.mode = parsed.mode || "calm";
-        state.chat = parsed.chat || [];
-        if (parsed.timer) {
-          state.timer.total = parsed.timer.total || 25 * 60;
-          state.timer.left = parsed.timer.left || state.timer.total;
-        }
-        return true;
-      } catch {
-        return false;
-      }
-    }
-
-    function escapeHtml(str) {
-      return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
-    }
-
-    function addTask(title, priority = "medium", energy = "medium") {
-      const clean = title.trim();
-      if (!clean) return;
-
-      state.tasks.unshift({
-        id: uid(),
-        title: clean,
-        priority,
-        energy,
-        done: false,
-        createdAt: Date.now()
-      });
-
-      save();
-      render();
-    }
-
-    function scoreTask(task) {
-      let score = 0;
-      if (task.done) return -999;
-
-      if (task.priority === "high") score += 60;
-      if (task.priority === "medium") score += 35;
-      if (task.priority === "low") score += 15;
-
-      if (task.energy === "low") score += 20;
-      if (task.energy === "medium") score += 10;
-      if (task.energy === "high") score += 2;
-
-      if (state.mode === "urgent" && task.priority === "high") score += 25;
-      if (state.mode === "single") score += 8;
-      if (state.mode === "reset" && task.energy === "low") score += 20;
-
-      const ageBonus = Math.min(20, Math.floor((Date.now() - task.createdAt) / (1000 * 60 * 60 * 8)));
-      score += ageBonus;
-
-      return score;
-    }
-
-    function getOpenTasks() {
-      return state.tasks.filter(t => !t.done);
-    }
-
-    function getDoneTasks() {
-      return state.tasks.filter(t => t.done);
-    }
-
-    function getBestTask() {
-      const open = getOpenTasks();
-      if (!open.length) return null;
-      return [...open].sort((a, b) => scoreTask(b) - scoreTask(a))[0];
-    }
-
-    function getFocusReason(task) {
-      if (!task) {
-        return {
-          why: "Il n’y a pas encore de matière à prioriser.",
-          action: "Ajoute 3 à 5 tâches réelles, même en vrac."
-        };
-      }
-
-      let why = "C’est le meilleur compromis entre impact et faisabilité maintenant.";
-      let action = "Ouvre le premier support ou document nécessaire, puis travaille dessus 10 minutes sans juger.";
-
-      if (task.priority === "high" && task.energy === "low") {
-        why = "C’est urgent et pourtant assez léger à lancer. Donc parfait pour casser l’inertie.";
-        action = "Fais la première micro-étape maintenant, sans chercher à finir toute la tâche.";
-      } else if (task.priority === "high" && task.energy === "high") {
-        why = "C’est clairement important. Tant que ton cerveau est disponible, il faut taper là-dessus.";
-        action = "Bloque 25 minutes dessus avant d’ouvrir quoi que ce soit d’autre.";
-      } else if (task.energy === "low") {
-        why = "Tu as besoin d’une entrée facile pour reprendre le contrôle sans t’épuiser.";
-        action = "Fais-la en premier pour te remettre en mouvement.";
-      }
-
-      if (state.mode === "reset") {
-        why = "Tu sembles surchargé. Cette tâche a été choisie parce qu’elle est suffisamment simple pour te relancer.";
-        action = "Ignore le reste. Lance uniquement cette mini-action pendant 5 à 10 minutes.";
-      }
-
-      return { why, action };
-    }
-
-    function priorityLabel(priority) {
-      if (priority === "high") return "Priorité haute";
-      if (priority === "low") return "Priorité basse";
-      return "Priorité moyenne";
-    }
-
-    function energyLabel(energy) {
-      if (energy === "high") return "Énergie haute";
-      if (energy === "low") return "Énergie basse";
-      return "Énergie moyenne";
-    }
-
-    function modeLabel(mode) {
-      if (mode === "single") return "Une seule chose";
-      if (mode === "urgent") return "Urgence";
-      if (mode === "reset") return "Reset";
-      return "Calme";
-    }
-
-    function renderTasks() {
-      const open = getOpenTasks().sort((a,b) => scoreTask(b) - scoreTask(a));
-      const done = getDoneTasks().sort((a,b) => b.createdAt - a.createdAt);
-
-      if (state.mode === "single") {
-        const best = getBestTask();
-        els.taskList.innerHTML = best ? taskHTML(best) : emptyHTML("Rien à afficher pour l’instant.");
-      } else {
-        els.taskList.innerHTML = open.length ? open.map(taskHTML).join("") : emptyHTML("Aucune tâche ouverte.");
-      }
-
-      els.doneList.innerHTML = done.length ? done.map(taskHTML).join("") : emptyHTML("Rien de terminé pour l’instant.");
-
-      document.querySelectorAll("[data-action='toggle']").forEach(btn => {
-        btn.onclick = () => toggleTask(btn.dataset.id);
-      });
-
-      document.querySelectorAll("[data-action='delete']").forEach(btn => {
-        btn.onclick = () => deleteTask(btn.dataset.id);
-      });
-
-      document.querySelectorAll("[data-action='boost']").forEach(btn => {
-        btn.onclick = () => boostTask(btn.dataset.id);
-      });
-    }
-
-    function taskHTML(task) {
-      const priorityClass =
-        task.priority === "high" ? "priority-high" :
-        task.priority === "low" ? "priority-low" : "priority-medium";
-
-      return `
-        <div class="task ${task.done ? "done" : ""}">
-          <div class="task-top">
-            <h4 class="task-title">${escapeHtml(task.title)}</h4>
-          </div>
-
-          <div class="task-meta">
-            <span class="pill ${priorityClass}">${priorityLabel(task.priority)}</span>
-            <span class="pill">${energyLabel(task.energy)}</span>
-          </div>
-
-          <div class="task-actions">
-            <button class="ghost-btn" data-action="toggle" data-id="${task.id}">
-              ${task.done ? "Remettre en cours" : "Terminer"}
-            </button>
-            ${!task.done ? `<button class="ghost-btn" data-action="boost" data-id="${task.id}">Mettre en priorité</button>` : ""}
-            <button class="ghost-btn" data-action="delete" data-id="${task.id}">Supprimer</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function emptyHTML(text) {
-      return `<div class="task"><div class="muted">${escapeHtml(text)}</div></div>`;
-    }
-
-    function toggleTask(id) {
-      const task = state.tasks.find(t => t.id === id);
-      if (!task) return;
-      task.done = !task.done;
-      save();
-      render();
-    }
-
-    function deleteTask(id) {
-      state.tasks = state.tasks.filter(t => t.id !== id);
-      save();
-      render();
-    }
-
-    function boostTask(id) {
-      const task = state.tasks.find(t => t.id === id);
-      if (!task) return;
-      task.priority = "high";
-      save();
-      render();
-    }
-
-    function renderStats() {
-      const open = getOpenTasks();
-      const done = getDoneTasks();
-      const best = getBestTask();
-
-      els.statOpen.textContent = open.length;
-      els.statDone.textContent = done.length;
-      els.statFocus.textContent = best ? truncate(best.title, 18) : "—";
-      els.statMode.textContent = modeLabel(state.mode);
-    }
-
-    function truncate(str, max) {
-      return str.length > max ? str.slice(0, max - 1) + "…" : str;
-    }
-
-    function renderFocusCard() {
-      const best = getBestTask();
-      const reasons = getFocusReason(best);
-
-      els.todayFocusTitle.textContent = best ? best.title : "Aucune priorité calculée";
-      els.todayFocusWhy.textContent = reasons.why;
-      els.todayFocusAction.textContent = reasons.action;
-    }
-
-    function renderModes() {
-      document.querySelectorAll(".mode").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.mode === state.mode);
-      });
-
-      if (state.mode === "single") {
-        els.tasksPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
-
-    function renderChat() {
-      if (!state.chat.length) {
-        state.chat = [
-          {
-            role: "ai",
-            text:
-`Je suis ton assistant de focus.
-
-Tu peux me parler normalement.
-Exemples :
-- “Qu’est-ce que je dois faire aujourd’hui ?”
-- “Aide-moi à me focus”
-- “Découpe-moi ma tâche en petites étapes”
-- “Je suis débordé”
-- “Choisis une seule priorité”
-
-Je m’appuie sur tes tâches pour te répondre de manière concrète.`
-          }
-        ];
-      }
-
-      els.chatStream.innerHTML = state.chat.map(msg => `
-        <div class="message">
-          <div class="avatar ${msg.role === "ai" ? "ai" : "user"}">${msg.role === "ai" ? "AI" : "Toi"}</div>
-          <div class="bubble">${escapeHtml(msg.text)}</div>
-        </div>
-      `).join("");
-
-      els.chatStream.scrollTop = els.chatStream.scrollHeight;
-    }
-
-    function pushMessage(role, text) {
-      state.chat.push({ role, text });
-      save();
-      renderChat();
-    }
-
-    function smartTodayResponse() {
-      const best = getBestTask();
-      if (!best) {
-        return `Tu n’as encore aucune tâche solide dans le système.
-
-Ce que tu dois faire maintenant :
-1. vider ce que tu as en tête dans le Brain dump
-2. transformer ça en tâches
-3. relancer la question
-
-Là, le problème n’est pas ton focus. Le problème, c’est l’absence de piste claire.`;
-      }
-
-      const { why, action } = getFocusReason(best);
-      return `Aujourd’hui, ta meilleure cible est :
-
-→ ${best.title}
-
-Pourquoi :
-${why}
-
-Ce que tu fais maintenant :
-${action}
-
-Règle :
-tu n’essaies pas de “tout gérer”.
-Tu protèges juste cette tâche pendant un bloc de focus.`;
-    }
-
-    function planThreeStepsResponse() {
-      const best = getBestTask();
-      const open = getOpenTasks();
-
-      if (!open.length) {
-        return `Tu n’as rien à découper pour l’instant.
-
-Balance 3 à 5 tâches dans le Brain dump, même sale, même mal écrit. Ensuite je t’en fais un plan.`;
-      }
-
-      const target = best || open[0];
-      return `OK, on arrête de tout regarder en même temps.
-
-Plan en 3 étapes pour :
-→ ${target.title}
-
-1. Ouvre ou prépare le support lié à cette tâche.
-2. Fais une version imparfaite ou un premier jet pendant 10 à 15 minutes.
-3. Termine une sortie visible : mail envoyé, slide créée, doc ouvert, brouillon prêt.
-
-Tu n’as pas besoin de motivation.
-Tu as besoin d’une friction plus faible que ton évitement.`;
-    }
-
-    function singleFocusResponse() {
-      const best = getBestTask();
-      if (!best) {
-        return `Je ne peux pas choisir une seule priorité si tu ne m’as rien donné.
-
-Ajoute des tâches. Sinon ton cerveau va continuer à tourner dans le vide.`;
-      }
-
-      state.mode = "single";
-      save();
-      render();
-
-      return `J’ai activé le mode “Une seule chose”.
-
-Ta seule priorité visible maintenant :
-→ ${best.title}
-
-Le reste existe encore, mais tu n’as pas à le regarder.
-Tu n’as qu’un boulot :
-commencer.`;
-    }
-
-    function resetResponse() {
-      state.mode = "reset";
-      save();
-      render();
-
-      return `On fait simple.
-
-Reset mental :
-1. expire lentement 3 fois
-2. lis uniquement la priorité du jour
-3. engage-toi sur 5 minutes, pas plus
-
-Tu n’es pas obligé d’avoir envie.
-Tu dois juste réduire la résistance d’entrée.`;
-    }
-
-    function taskBreakdownResponse(userText) {
-      const best = getBestTask();
-      const target = best ? best.title : "ta tâche principale";
-
-      return `Je te découpe ça très simplement pour : ${target}
-
-- étape 1 : définir exactement le livrable attendu
-- étape 2 : ouvrir les documents ou outils nécessaires
-- étape 3 : produire une première version moche mais réelle
-- étape 4 : corriger et envoyer / finaliser
-
-Règle d’or :
-ne commence jamais par “bien faire”.
-Commence par “faire exister”.`;
-    }
-
-    function assistantReply(input) {
-      const text = input.toLowerCase().trim();
-
-      if (!text) {
-        return "Écris-moi vraiment ce que tu veux faire ou ce qui te bloque.";
-      }
-
-      if (text.includes("aujourd") || text.includes("quoi faire") || text.includes("priorit")) {
-        return smartTodayResponse();
-      }
-
-      if (text.includes("plan") || text.includes("organise") || text.includes("organiser") || text.includes("3 étapes")) {
-        return planThreeStepsResponse();
-      }
-
-      if (text.includes("focus") || text.includes("concentr") || text.includes("une seule")) {
-        return singleFocusResponse();
-      }
-
-      if (text.includes("reset") || text.includes("débord") || text.includes("debord") || text.includes("perdu") || text.includes("satur")) {
-        return resetResponse();
-      }
-
-      if (text.includes("découpe") || text.includes("decoupe") || text.includes("étape") || text.includes("micro")) {
-        return taskBreakdownResponse(input);
-      }
-
-      if (text.includes("retard") || text.includes("urgent")) {
-        state.mode = "urgent";
-        save();
-        render();
-        return `J’ai basculé en mode urgence.
-
-On arrête le perfectionnisme.
-On cherche ce qui a le plus d’impact immédiat, puis on exécute vite.
-Clique sur “Que dois-je faire aujourd’hui ?” ou laisse-moi choisir la priorité
+</div>
+
+<!-- TASKS -->
+
+<div class="screen" id="s-tasks">
+  <div class="topbar"><div class="ti"><div class="tl"><div class="tg">ROADMAP</div><div class="tt">Mes t&acirc;ches</div></div><div style="font-size:13px;color:var(--t2);font-weight:600" id="tcount"></div></div></div>
+  <div class="scroll">
+    <div class="ptabs" id="ptabs">
+      <div class="ptab tall on" onclick="filterT('all',this)">Tout</div>
+      <div class="ptab t1" onclick="filterT('p1',this)">Phase 1</div>
+      <div class="ptab t2" onclick="filterT('p2',this)">Phase 2</div>
+      <div class="ptab t3" onclick="filterT('p3',this)">Phase 3</div>
+    </div>
+    <div id="tlist"></div>
+  </div>
+</div>
+
+<!-- AI -->
+
+<div class="screen" id="s-ai" style="background:var(--bg)">
+  <div class="aitop"><div class="aiav">&#x2726;</div><div><div class="ain">Empire AI</div><div class="ais2">Ton assistant &middot; En ligne</div></div></div>
+  <div class="aiscroll" id="cs"></div>
+  <div style="background:var(--white);border-top:1px solid var(--border)">
+    <div class="aisugg" id="sugg"></div>
+    <div class="aibar"><textarea class="aiinput" id="ainp" placeholder="Dis-moi ce dont tu as besoin&hellip;" rows="1" oninput="ar(this)" onkeydown="hk(event)"></textarea><button class="aisend" onclick="send()">&#x2191;</button></div>
+  </div>
+</div>
+
+<!-- ADD -->
+
+<div class="screen" id="s-add">
+  <div class="topbar"><div class="ti"><div class="tl"><div class="tg">ORGANISER</div><div class="tt">Ajouter &amp; Rappels</div></div></div></div>
+  <div class="scroll">
+    <div class="card">
+      <div class="ct">Nouvelle t&acirc;che</div>
+      <div class="fgrp"><label class="flb">Emoji</label><input class="finp" id="ne" type="text" placeholder="&#x1F3AF;" maxlength="2"></div>
+      <div class="fgrp"><label class="flb">Titre</label><input class="finp" id="nt" type="text" placeholder="Qu&apos;est-ce que tu veux faire ?"></div>
+      <div class="fgrp"><label class="flb">Description</label><input class="finp" id="nd" type="text" placeholder="D&eacute;tails..."></div>
+      <div class="fgrp"><label class="flb">Mois</label><input class="finp" id="nm" type="text" placeholder="Ex: Mars 2026"></div>
+      <div class="fgrp"><label class="flb">Phase</label><select class="fsel" id="np"><option value="p1">Phase 1 &mdash; TikTok / YouTube</option><option value="p2">Phase 2 &mdash; Marque v&ecirc;tements</option><option value="p3">Phase 3 &mdash; Code &amp; Automatisation</option></select></div>
+      <button class="bprim" onclick="addTask()">Ajouter la t&acirc;che</button>
+    </div>
+    <div class="divider">&#x23F0; Rappels</div>
+    <div id="rlist"></div>
+    <button class="addout" onclick="openRM()">&#xFF0B; &nbsp;Nouveau rappel</button>
+    <div style="padding:14px 16px;background:var(--white);border-radius:var(--r);border:1px solid var(--border);margin-top:4px"><div style="font-size:12px;color:var(--t2);line-height:1.7">&#x1F4A1; <strong>Astuce TDAH :</strong> Configure un rappel le matin pour ta t&acirc;che du jour et un le soir pour faire le bilan.</div></div>
+  </div>
+</div>
+
+<nav class="bnav">
+  <button class="nb on" onclick="go('home',this)"><div class="ni">&#x1F3E0;</div><div class="nl">Accueil</div></button>
+  <button class="nb" onclick="go('tasks',this)"><div class="ni">&#x2705;</div><div class="nl">T&acirc;ches</div></button>
+  <button class="nb" onclick="go('ai',this)"><div class="ni">&#x2726;</div><div class="nl">IA</div></button>
+  <button class="nb" onclick="go('add',this)"><div class="ni">&#xFF0B;</div><div class="nl">Ajouter</div></button>
+</nav>
+
+<div class="mbg" id="rm" onclick="closeRM(event)">
+  <div class="msh">
+    <div class="mhnd"></div>
+    <div class="mtt">Nouveau rappel</div>
+    <div class="fgrp"><label class="flb">Titre</label><input class="finp" id="rt" type="text" placeholder="Ex: Cr&eacute;er ma vid&eacute;o du jour"></div>
+    <div class="fgrp"><label class="flb">Heure</label><input class="finp" id="rtime" type="time" value="09:00"></div>
+    <div class="fgrp"><label class="flb">Jours</label>
+      <div class="dprow">
+        <div class="dp on" data-d="1">Lun</div><div class="dp on" data-d="2">Mar</div><div class="dp on" data-d="3">Mer</div>
+        <div class="dp on" data-d="4">Jeu</div><div class="dp on" data-d="5">Ven</div><div class="dp" data-d="6">Sam</div><div class="dp" data-d="0">Dim</div>
+      </div>
+    </div>
+    <div class="mbtns"><button class="bcanc" onclick="document.getElementById('rm').classList.remove('open')">Annuler</button><button class="bprim" style="flex:1" onclick="saveR()">Enregistrer</button></div>
+  </div>
+</div>
+
+<script>
+const DTASKS=[
+  {id:1,emoji:'&#x1F3AF;',title:'Choisir ta niche',desc:'Motivation, myst&egrave;re, lifestyle, finance&hellip;',month:'Mars 2026',phase:'p1'},
+  {id:2,emoji:'&#x1F4F1;',title:'Cr&eacute;er comptes TikTok + YouTube',desc:'Nom coh&eacute;rent, bio pro, photo IA.',month:'Mars 2026',phase:'p1'},
+  {id:3,emoji:'&#x1F50D;',title:'Analyser 10 cha&icirc;nes faceless',desc:'Comprendre formats, dur&eacute;e, hooks.',month:'Mars 2026',phase:'p1'},
+  {id:4,emoji:'&#x1F6E0;',title:'Installer les outils IA',desc:'CapCut, ElevenLabs, Canva, InVideo.',month:'Mars 2026',phase:'p1'},
+  {id:5,emoji:'&#x1F3AC;',title:'Premi&egrave;re vid&eacute;o publi&eacute;e',desc:'Script IA, voix IA, montage CapCut.',month:'Mars 2026',phase:'p1'},
+  {id:6,emoji:'&#x1F4C5;',title:'Calendrier &eacute;ditorial 30 vid&eacute;os',desc:'Planifier avec Claude pour les scripts.',month:'Avril 2026',phase:'p1'},
+  {id:7,emoji:'&#x1F501;',title:'Reposter TikTok &rarr; YouTube Shorts',desc:'Double pr&eacute;sence sans double travail.',month:'Avril 2026',phase:'p1'},
+  {id:8,emoji:'&#x1F4CA;',title:'Analyser ses stats chaque semaine',desc:'Watch time, taux compl&eacute;tion, saves.',month:'Avril 2026',phase:'p1'},
+  {id:9,emoji:'&#x1F4B8;',title:'Premiers liens affiliation',desc:'Amazon Associates ou outils IA.',month:'Avril 2026',phase:'p1'},
+  {id:10,emoji:'&#x1F4B0;',title:'Activer TikTok Creativity Program',desc:'D&egrave;s 10k abonn&eacute;s.',month:'Mai 2026',phase:'p1'},
+  {id:11,emoji:'&#x1F4F9;',title:'Lancer longues vid&eacute;os YouTube',desc:'1000 abonn&eacute;s + 4000h watch time.',month:'Mai 2026',phase:'p1'},
+  {id:12,emoji:'&#x1F91D;',title:'Premier partenariat / sponsor',desc:'Contacter des marques en lien avec la niche.',month:'Mai 2026',phase:'p1'},
+  {id:13,emoji:'&#x1F455;',title:"Cr&eacute;er l'identit&eacute; de la marque",desc:'Nom, logo IA, univers visuel.',month:'Juin 2026',phase:'p2'},
+  {id:14,emoji:'&#x1F3EA;',title:'Ouvrir boutique Printful + Shopify',desc:'0&euro; de stock. Commandes &agrave; la demande.',month:'Juin 2026',phase:'p2'},
+  {id:15,emoji:'&#x1F4E2;',title:'Promouvoir via audience TikTok/YT',desc:'Int&eacute;grer la marque dans les vid&eacute;os.',month:'Juin 2026',phase:'p2'},
+  {id:16,emoji:'&#x1F3A8;',title:'Lancer 3-5 designs avec IA',desc:'Midjourney &rarr; vectoriser &rarr; Printful.',month:'Juil 2026',phase:'p2'},
+  {id:17,emoji:'&#x1F4F8;',title:'Contenu mode TikTok',desc:'Mockups IA, unboxing, behind-the-scenes.',month:'Juil 2026',phase:'p2'},
+  {id:18,emoji:'&#x1F4E7;',title:'D&eacute;marrer une liste email',desc:'Klaviyo gratuit. Collecter les emails.',month:'Ao&ucirc;t 2026',phase:'p2'},
+  {id:19,emoji:'&#x1F40D;',title:'Apprendre Python (bases)',desc:'FreeCodeCamp + Claude comme tuteur.',month:'Sept 2026',phase:'p3'},
+  {id:20,emoji:'&#x1F916;',title:'Automatiser la cr&eacute;ation de scripts',desc:'Python g&eacute;n&egrave;re 30 id&eacute;es vid&eacute;os en 1 clic.',month:'Oct 2026',phase:'p3'},
+  {id:21,emoji:'&#x2699;',title:'Connecter Make / Zapier',desc:'Nouvelle vid&eacute;o &rarr; post auto partout.',month:'Oct 2026',phase:'p3'},
+  {id:22,emoji:'&#x1F4E6;',title:'Automatiser les commandes boutique',desc:'Emails suivi auto, reporting hebdo.',month:'Nov 2026',phase:'p3'},
+  {id:23,emoji:'&#x1F4C8;',title:'Construire un dashboard de suivi',desc:'Revenus TikTok + YouTube + boutique.',month:'Nov 2026',phase:'p3'},
+];
+const QQ=[
+  {t:"La discipline est le pont entre les objectifs et les accomplissements.",a:"Jim Rohn"},
+  {t:"Commence l&agrave; o&ugrave; tu es. Utilise ce que tu as. Fais ce que tu peux.",a:"Arthur Ashe"},
+  {t:"La constance est plus importante que la perfection.",a:"Anonyme"},
+  {t:"Chaque expert a un jour &eacute;t&eacute; un d&eacute;butant.",a:"Helen Hayes"},
+  {t:"Un jour ou un jour 1. C'est toi qui choisis.",a:"Paulo Coelho"},
+  {t:"Fais aujourd'hui ce que les autres ne feront pas.",a:"Jerry Rice"},
+  {t:"Le succ&egrave;s c'est aller d'&eacute;chec en &eacute;chec sans perdre son enthousiasme.",a:"Winston Churchill"},
+  {t:"Votre futur est cr&eacute;&eacute; par ce que vous faites aujourd'hui.",a:"Robert Kiyosaki"},
+];
+const AR=[
+  "Je suis l&agrave; pour t'aider ! Tu peux me demander quoi faire aujourd'hui, comment avancer, ou juste me dire ce qui te bloque. &#x1F680;",
+  "Bonne question ! Concentre-toi sur UNE seule chose &agrave; la fois. Qu'est-ce qui te semble le plus urgent l&agrave; maintenant ?",
+  "Avec le TDAH, la cl&eacute; c'est de d&eacute;couper les grandes t&acirc;ches en micro-actions. Dis-moi sur quoi tu travailles et je te fais un plan en 3 &eacute;tapes max.",
+  "Tu construis ton empire &agrave; 0&euro;. Une seule action aujourd'hui. C'est tout ce qui compte. &#x1F4AA;",
+];
+let tasks=[],reminders=[],fi=0,qi=0,streak=0,ld='',ch=[],sd=[1,2,3,4,5],cf='all';
+function load(){try{
+  const t=localStorage.getItem('byb_t');
+  tasks=t?JSON.parse(t):DTASKS.map(x=>({...x,done:false}));
+  const r=localStorage.getItem('byb_r');
+  reminders=r?JSON.parse(r):[{id:1,title:'&#x1F3AC; Cr&eacute;er ma vid&eacute;o du jour',time:'09:00',days:[1,2,3,4,5],on:true},{id:2,title:'&#x1F4CA; Checker mes stats',time:'20:00',days:[1,3,5],on:true}];
+  fi=parseInt(localStorage.getItem('byb_f')||'0');
+  streak=parseInt(localStorage.getItem('byb_s')||'0');
+  ld=localStorage.getItem('byb_l')||'';
+  const c=localStorage.getItem('byb_c');ch=c?JSON.parse(c):[];
+  qi=parseInt(localStorage.getItem('byb_q')||'0');
+  if(localStorage.getItem('byb_b')==='off'){const el=document.getElementById('ibar');if(el)el.style.display='none';}
+}catch(e){tasks=DTASKS.map(x=>({...x,done:false}));reminders=[];ch=[];}}
+function sv(){try{localStorage.setItem('byb_t',JSON.stringify(tasks));localStorage.setItem('byb_r',JSON.stringify(reminders));localStorage.setItem('byb_f',fi);localStorage.setItem('byb_s',streak);localStorage.setItem('byb_l',ld);localStorage.setItem('byb_c',JSON.stringify(ch.slice(-40)));localStorage.setItem('byb_q',qi);}catch(e){}}
+function setGr(){const h=new Date().getHours();document.getElementById('greet').textContent=h<12?'Bonjour \u{1F44B}':h<18?'Bon apr\u00E8s-midi \u2600\uFE0F':'Bonsoir \u{1F319}';}
+function renderF(){const p=tasks.filter(t=>!t.done);if(!p.length){document.getElementById('ftask').innerHTML='&#x1F389; Tout est compl&eacute;t&eacute; !';document.getElementById('fdesc').textContent='Incroyable ! Ajoute de nouvelles t&#226;ches.';return;}if(fi>=p.length)fi=0;const t=p[fi];document.getElementById('ftask').innerHTML=t.emoji+' '+t.title;document.getElementById('fdesc').innerHTML=t.desc;}
+function doneToday(){const p=tasks.filter(t=>!t.done);if(!p.length)return;if(fi>=p.length)fi=0;const t=tasks.find(x=>x.id===p[fi].id);if(t){t.done=true;const td=new Date().toDateString();if(ld!==td){const yd=new Date(Date.now()-86400000).toDateString();streak=(ld===yd)?streak+1:1;ld=td;}sv();renderF();renderStats();renderStreak();showT('&#x2705;','T&#226;che compl&eacute;t&eacute;e !',t.title);}}
+function skipFocus(){const p=tasks.filter(t=>!t.done);if(p.length>1)fi=(fi+1)%p.length;sv();renderF();}
+function renderStreak(){document.getElementById('sn').textContent=streak;const m=['Commence aujourd\'hui !','Bien d&eacute;marr&eacute; &#x1F4AA;','Continue comme &ccedil;a &#x1F525;','Tu es en feu ! &#x1F680;','Inarr&ecirc;table &#x1F3C6;','L&eacute;gende &#x26A1;'];document.getElementById('sm').innerHTML=m[Math.min(streak,m.length-1)];}
+function renderStats(){['p1','p2','p3'].forEach((p,i)=>{const a=tasks.filter(t=>t.phase===p),d=a.filter(t=>t.done).length;const pc=a.length?Math.round((d/a.length)*100):0;document.getElementById('p'+(i+1)+'p').textContent=pc+'%';document.getElementById('p'+(i+1)+'b').style.width=pc+'%';});const d=tasks.filter(t=>t.done).length;const el=document.getElementById('tcount');if(el)el.textContent=d+'/'+tasks.length+' faites';}
+function renderT(){const list=document.getElementById('tlist');const fil=cf==='all'?tasks:tasks.filter(t=>t.phase===cf);if(!fil.length){list.innerHTML='<div class="empty"><div class="emico">&#x1F4ED;</div><p>Aucune t&#226;che ici.</p></div>';return;}const mo={};fil.forEach(t=>{if(!mo[t.month])mo[t.month]=[];mo[t.month].push(t);});let h='';for(const[m,mt]of Object.entries(mo)){const d=mt.filter(t=>t.done).length;h+='<div class="mlbl">'+m+'<span class="mc">'+d+'/'+mt.length+'</span></div>';mt.forEach(t=>{const cl=t.phase==='p1'?'ch1':t.phase==='p2'?'ch2':'ch3';const pl=t.phase==='p1'?'Phase 1':t.phase==='p2'?'Phase 2':'Phase 3';h+='<div class="tr '+t.phase+(t.done?' done':'')+'" onclick="togT('+t.id+')"><div class="teb">'+t.emoji+'</div><div class="tb"><span class="tch '+cl+'">'+pl+'</span><div class="tn">'+t.title+'</div><div class="tdd">'+t.desc+'</div></div><div class="tck">'+(t.done?'&#x2713;':'')+'</div></div>';});}list.innerHTML=h;}
+function togT(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;if(t.done){const td=new Date().toDateString();if(ld!==td){const yd=new Date(Date.now()-86400000).toDateString();streak=(ld===yd)?streak+1:1;ld=td;}showT('&#x2705;','T&#226;che compl&eacute;t&eacute;e !',t.title);}sv();renderT();renderStats();renderF();renderStreak();}}
+function filterT(f,el){cf=f;document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');renderT();}
+function addTask(){const e=document.getElementById('ne').value.trim()||'&#x1F4CC;';const t=document.getElementById('nt').value.trim();const d=document.getElementById('nd').value.trim();const m=document.getElementById('nm').value.trim()||'&Agrave; faire';const p=document.getElementById('np').value;if(!t)return;tasks.push({id:Date.now(),emoji:e,title:t,desc:d,month:m,phase:p,done:false});['ne','nt','nd','nm'].forEach(id=>document.getElementById(id).value='');sv();renderT();renderStats();renderF();showT('&#x2705;','T&#226;che ajout&eacute;e !',t);go('tasks',document.querySelectorAll('.nb')[1]);}
+const TARGET=new Date('2026-05-31T23:59:59');
+function tick(){const df=TARGET-new Date();if(df<=0)return;const d=Math.floor(df/86400000),h=Math.floor((df%86400000)/3600000),mi=Math.floor((df%3600000)/60000),s=Math.floor((df%60000)/1000);document.getElementById('cdD').textContent=String(d).padStart(2,'0');document.getElementById('cdH').textContent=String(h).padStart(2,'0');document.getElementById('cdM').textContent=String(mi).padStart(2,'0');document.getElementById('cdS').textContent=String(s).padStart(2,'0');}
+function renderQ(){const q=QQ[qi%QQ.length];document.getElementById('qt').innerHTML=q.t;document.getElementById('qa').innerHTML='&mdash; '+q.a;}
+function nxtQ(){qi=(qi+1)%QQ.length;sv();renderQ();}
+function nw(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function renderChat(){const s=document.getElementById('cs');if(!ch.length){const p=tasks.filter(t=>!t.done);const ft=p.length?p[0]:null;const w='Salut ! Je suis Empire AI, ton assistant personnel. Je suis l&#224; pour t&#39;aider &#224; avancer une &#233;tape &#224; la fois. &#x1F680;<br><br>'+(ft?'&#x1F4CC; Ta priorit&#233; du moment : '+ft.emoji+' '+ft.title+'<br><br>':'')+'Qu&#39;est-ce dont tu as besoin l&#224; maintenant ?';ch.push({role:'ai',text:w,time:nw()});sv();}s.innerHTML=ch.map(m=>'<div class="msg '+m.role+'"><div class="mb">'+m.text+'</div><div class="mt2">'+m.time+'</div></div>').join('');setTimeout(()=>s.scrollTop=s.scrollHeight,50);renderSugg();}
+function renderSugg(){const chips=["Que faire aujourd'hui ?","Je suis bloqu&eacute;","Mon plan TikTok","Choisir ma niche","Mon avancement","Motiver-moi"];document.getElementById('sugg').innerHTML=chips.map((c,i)=>'<div class="sgch" onclick="useSugg('+i+')">'+c+'</div>').join('');}
+const SUGG_MAP=["Que faire aujourd'hui ?","Je suis bloque","Mon plan TikTok","Choisir ma niche","Mon avancement","Motiver-moi"];
+function useSugg(i){document.getElementById('ainp').value=SUGG_MAP[i];send();}
+function send(){const inp=document.getElementById('ainp');const text=inp.value.trim();if(!text)return;inp.value='';inp.style.height='';ch.push({role:'user',text:text.replace(/</g,'&lt;').replace(/>/g,'&gt;'),time:nw()});renderChat();const cs=document.getElementById('cs');const te=document.createElement('div');te.className='msg ai';te.id='typing';te.innerHTML='<div class="mb"><div class="typing2"><div class="td3"></div><div class="td3"></div><div class="td3"></div></div></div>';cs.appendChild(te);cs.scrollTop=cs.scrollHeight;setTimeout(()=>{te.remove();const rep=getR(text.toLowerCase());ch.push({role:'ai',text:rep,time:nw()});sv();renderChat();},1000+Math.random()*800);}
+function getR(t){const p=tasks.filter(x=>!x.done);const ft=p.length?p[Math.min(fi,p.length-1)]:null;
+if(t.includes('aujourd')||t.includes('focus')||t.includes('faire')||t.includes('priorit')){if(ft)return'&#x1F3AF; <strong>Ta mission du moment :</strong><br><br>'+ft.emoji+' <strong>'+ft.title+'</strong><br><br>'+ft.desc+'<br><br>Une seule chose. Ferme tout le reste. Lance une minuterie de 25 min. GO ! &#x1F4AA;';return'&#x1F389; Toutes tes t&#226;ches sont compl&#233;t&#233;es ! Tu es incroyable.';}
+if(t.includes('bloqu')||t.includes('difficile')||t.includes('aide'))return"C'est normal de se sentir bloqu&#233;. Voici ce que je te conseille :<br><br>&#x2705; Ferme tout sauf une seule app<br>&#x2705; Mets une minuterie de 25 minutes<br>&#x2705; Fais UNE seule micro-t&#226;che<br><br>Qu'est-ce qui te bloque exactement ?";
+if(t.includes('niche')||t.includes('sujet'))return"Pour choisir ta niche, r&#233;ponds &#224; ces 3 questions :<br><br>1. De quoi peux-tu parler 1h sans t'ennuyer ?<br>2. Quel probl&#232;me as-tu toi-m&#234;me r&#233;solu ?<br>3. Qu'est-ce que tes amis te demandent souvent ?<br><br>La niche parfaite est &#224; l'intersection des 3. Qu'est-ce qui te vient ?";
+if(t.includes('plan')||t.includes('tiktok')||t.includes('vid'))return"Voici ton plan TikTok pour aujourd'hui :<br><br>1&#65039;&#8419; Ouvre CapCut<br>2&#65039;&#8419; Choisis ton sujet<br>3&#65039;&#8419; &#201;cris un script de 30 secondes avec Claude<br>4&#65039;&#8419; Voix avec ElevenLabs<br>5&#65039;&#8419; Monte et publie<br><br>Une vid&#233;o. C'est tout. GO ! &#x1F525;";
+if(t.includes('avance')||t.includes('progr')||t.includes('r&#233;sult')||t.includes('result')){const done=tasks.filter(x=>x.done).length,tot=tasks.length;const pc=Math.round((done/tot)*100);return'&#x1F4CA; <strong>Ton avancement :</strong><br><br>'+done+'/'+tot+' t&#226;ches ('+pc+'%)<br>&#x1F525; Streak : '+streak+' jour'+(streak>1?'s':'')+'<br><br>'+(pc<25?'Tu d&#233;marres ! Continue !':pc<50?'Bon rythme, tu avances bien !':pc<75?'Plus de la moiti&#233; ! Impressionnant.':'Tu es presque au bout ! &#x1F3C6;');}
+if(t.includes('motiv')||t.includes('courage')||t.includes('dur'))return"Je t'entends. C'est dur de rester constant.<br><br>&#x1F4A1; Tu as d&#233;j&#224; cr&#233;&#233; cette app. Tu as d&#233;j&#224; fait les premiers pas.<br><br>Les gens qui r&#233;ussissent agissent m&#234;me sans motivation.<br><br>Une seule micro-action maintenant. Qu'est-ce que tu peux faire en 5 minutes ? &#x1F680;";
+return AR[Math.floor(Math.random()*AR.length)];}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function renderR(){const list=document.getElementById('rlist');if(!reminders.length){list.innerHTML='<div class="empty"><div class="emico">&#x23F0;</div><p>Aucun rappel.</p></div>';return;}const days=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];list.innerHTML=reminders.map(r=>{const[h,m]=r.time.split(':');const hr=parseInt(h);const ap=hr>=12?'PM':'AM';const h12=hr>12?hr-12:hr===0?12:hr;const ds=r.days.length===7?'Tous les jours':r.days.map(d=>days[d]).join(', ');return'<div class="rrow"><div class="rtb"><div class="rtbig">'+h12+':'+m+'</div><div class="rtam">'+ap+'</div></div><div class="ri"><div class="rit">'+r.title+'</div><div class="rid">'+ds+'</div></div><div class="tog '+(r.on?'on':'')+'" onclick="togR('+r.id+')"><div class="togk"></div></div></div>';}).join('');}
+function togR(id){const r=reminders.find(r=>r.id===id);if(r){r.on=!r.on;sv();renderR();}}
+function openRM(){sd=[1,2,3,4,5];document.getElementById('rt').value='';document.getElementById('rtime').value='09:00';document.querySelectorAll('.dp').forEach(c=>c.classList.toggle('on',sd.includes(parseInt(c.dataset.d))));document.getElementById('rm').classList.add('open');}
+document.querySelectorAll('.dp').forEach(c=>{c.addEventListener('click',()=>{const d=parseInt(c.dataset.d);if(sd.includes(d)){sd=sd.filter(x=>x!==d);c.classList.remove('on');}else{sd.push(d);c.classList.add('on');}});});
+function closeRM(e){if(e.target===document.getElementById('rm'))document.getElementById('rm').classList.remove('open');}
+function saveR(){const t=document.getElementById('rt').value.trim();const ti=document.getElementById('rtime').value;if(!t)return;reminders.push({id:Date.now(),title:t,time:ti,days:[...sd],on:true});sv();renderR();document.getElementById('rm').classList.remove('open');showT('&#x23F0;','Rappel cr&#233;&#233; !',t);}
+function showT(ico,h,b){document.getElementById('tci').innerHTML=ico;document.getElementById('tch').innerHTML=h;document.getElementById('tcb').innerHTML=b;const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function go(n,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+n).classList.add('active');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');if(n==='tasks')renderT();if(n==='ai')renderChat();if(n==='add')renderR();}
+function dismissI(){document.getElementById('ibar').style.display='none';try{localStorage.setItem('byb_b','off');}catch(e){}}
+setInterval(()=>{const nw2=new Date();const cur=String(nw2.getHours()).padStart(2,'0')+':'+String(nw2.getMinutes()).padStart(2,'0');reminders.forEach(r=>{if(r.on&&r.days.includes(nw2.getDay())&&r.time===cur)showT('&#x23F0;','Rappel !',r.title);});},60000);
+function init(){
+  load();
+  const h=new Date().getHours();
+  document.getElementById('greet').textContent=h<12?'Bonjour \u{1F44B}':h<18?'Bon apr\u00E8s-midi':' Bonsoir';
+  renderF();renderStats();renderStreak();renderQ();tick();setInterval(tick,1000);
+}
+init();
+</script>
+
+</body>
+</html>
